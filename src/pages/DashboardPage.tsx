@@ -38,6 +38,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 export default function DashboardPage() {
+  const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<TestResult | null>(null);
   const [habits, setHabits] = useState<Habit[]>(() => {
     const saved = localStorage.getItem('ascend_habits');
