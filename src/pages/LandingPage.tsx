@@ -47,6 +47,8 @@ const fadeUp = {
 };
 
 export default function LandingPage() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       {/* Nav */}
@@ -56,10 +58,10 @@ export default function LandingPage() {
             ASCEND<span className="text-primary">.</span>
           </span>
           <Link
-            to="/auth"
+            to={user ? "/dashboard" : "/auth"}
             className="px-5 py-2 rounded-lg bg-primary text-primary-foreground font-heading text-sm font-semibold hover:brightness-110 transition-all"
           >
-            Start Now
+            {user ? "Dashboard" : "Start Now"}
           </Link>
         </div>
       </nav>
