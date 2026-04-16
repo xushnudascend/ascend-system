@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Flame, Target, Brain, Zap, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const painPoints = [
   "You start, then quit after 3 days.",
