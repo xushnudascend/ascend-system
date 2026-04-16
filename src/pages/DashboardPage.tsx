@@ -6,10 +6,11 @@ import {
   Shield, Flame, Zap, Brain, Target, TrendingUp,
   CheckCircle2, Circle, Plus, BookOpen, Dumbbell,
   DollarSign, Heart, GraduationCap, ChevronRight,
-  Calculator, MessageCircle, BarChart3
+  Calculator, MessageCircle, BarChart3, LogOut
 } from "lucide-react";
 import type { TestResult } from "@/data/onboardingQuestions";
 import { categories } from "@/data/courses";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Habit {
   id: string;
@@ -37,6 +38,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 export default function DashboardPage() {
+  const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<TestResult | null>(null);
   const [habits, setHabits] = useState<Habit[]>(() => {
     const saved = localStorage.getItem('ascend_habits');
@@ -99,7 +101,7 @@ export default function DashboardPage() {
       <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3">
         <div className="flex items-center justify-between max-w-5xl mx-auto">
           <span className="font-heading text-lg font-bold">ASCEND<span className="text-primary">.</span></span>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-3 text-sm">
             <Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
               <BookOpen className="w-4 h-4" /> Kurslar
             </Link>
@@ -109,6 +111,9 @@ export default function DashboardPage() {
             <Link to="/analytics" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
               <BarChart3 className="w-4 h-4" /> Analitika
             </Link>
+            <button onClick={() => signOut()} className="text-muted-foreground hover:text-destructive transition-colors">
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </nav>
