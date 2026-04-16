@@ -14,7 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      habits: {
+        Row: {
+          completed: boolean
+          created_at: string
+          difficulty: number
+          id: string
+          last_completed_at: string | null
+          name: string
+          streak: number
+          user_id: string
+          xp_reward: number
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          difficulty?: number
+          id?: string
+          last_completed_at?: string | null
+          name: string
+          streak?: number
+          user_id: string
+          xp_reward?: number
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          difficulty?: number
+          id?: string
+          last_completed_at?: string | null
+          name?: string
+          streak?: number
+          user_id?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          addiction_level: string | null
+          avatar_url: string | null
+          created_at: string
+          discipline_score: number
+          display_name: string | null
+          energy_level: string | null
+          id: string
+          rank: string
+          streak: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          addiction_level?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          discipline_score?: number
+          display_name?: string | null
+          energy_level?: string | null
+          id?: string
+          rank?: string
+          streak?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          addiction_level?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          discipline_score?: number
+          display_name?: string | null
+          energy_level?: string | null
+          id?: string
+          rank?: string
+          streak?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
