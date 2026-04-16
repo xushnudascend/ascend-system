@@ -6,10 +6,11 @@ import {
   Shield, Flame, Zap, Brain, Target, TrendingUp,
   CheckCircle2, Circle, Plus, BookOpen, Dumbbell,
   DollarSign, Heart, GraduationCap, ChevronRight,
-  Calculator, MessageCircle, BarChart3
+  Calculator, MessageCircle, BarChart3, LogOut
 } from "lucide-react";
 import type { TestResult } from "@/data/onboardingQuestions";
 import { categories } from "@/data/courses";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Habit {
   id: string;
