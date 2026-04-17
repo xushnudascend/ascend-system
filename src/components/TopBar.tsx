@@ -52,10 +52,10 @@ export default function TopBar() {
             </button>
             {openLang && (
               <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden z-50">
-                {(["uz", "en", "ru"] as Lang[]).map(l => (
+                {(["uz", "en", "ru", "tr"] as Lang[]).map(l => (
                   <button key={l} onClick={() => { setLang(l); setOpenLang(false); }}
                     className={`block w-full px-4 py-2 text-xs text-left hover:bg-muted ${lang === l ? "text-primary font-medium" : ""}`}>
-                    {l === "uz" ? "O'zbek" : l === "en" ? "English" : "Русский"}
+                    {l === "uz" ? "O'zbek" : l === "en" ? "English" : l === "ru" ? "Русский" : "Türkçe"}
                   </button>
                 ))}
               </div>
