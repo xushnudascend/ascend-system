@@ -74,14 +74,73 @@ export type Database = {
         }
         Relationships: []
       }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          likes_count: number
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          id?: string
+          likes_count?: number
+          user_id: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          likes_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           addiction_level: string | null
           avatar_url: string | null
+          bio: string | null
+          country: string | null
           created_at: string
           discipline_score: number
           display_name: string | null
           energy_level: string | null
+          goals: string | null
           id: string
           rank: string
           streak: number
@@ -92,10 +151,13 @@ export type Database = {
         Insert: {
           addiction_level?: string | null
           avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
           created_at?: string
           discipline_score?: number
           display_name?: string | null
           energy_level?: string | null
+          goals?: string | null
           id?: string
           rank?: string
           streak?: number
@@ -106,10 +168,13 @@ export type Database = {
         Update: {
           addiction_level?: string | null
           avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
           created_at?: string
           discipline_score?: number
           display_name?: string | null
           energy_level?: string | null
+          goals?: string | null
           id?: string
           rank?: string
           streak?: number
