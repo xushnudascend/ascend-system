@@ -58,34 +58,27 @@
     font-family: 'Manrope', sans-serif;
   }
 
-  .dark {
-    --background: 216 60% 7%;
-    --foreground: 190 100% 95%;
-    --card: 210 40% 14%;
-    --card-foreground: 190 100% 95%;
-    --popover: 210 40% 12%;
-    --popover-foreground: 190 100% 95%;
-    --primary: 190 100% 50%;
-    --primary-foreground: 216 60% 7%;
-    --secondary: 210 30% 20%;
-    --secondary-foreground: 190 100% 90%;
-    --muted: 210 25% 15%;
-    --muted-foreground: 210 20% 55%;
-    --accent: 190 100% 50%;
-    --accent-foreground: 216 60% 7%;
+  .light {
+    --background: 200 30% 98%;
+    --foreground: 216 60% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 216 60% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 216 60% 10%;
+    --primary: 190 90% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 92%;
+    --secondary-foreground: 216 60% 10%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 216 20% 40%;
+    --accent: 190 90% 40%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 30% 18%;
-    --input: 210 30% 18%;
-    --ring: 190 100% 50%;
-    --sidebar-background: 216 60% 5%;
-    --sidebar-foreground: 190 100% 95%;
-    --sidebar-primary: 190 100% 50%;
-    --sidebar-primary-foreground: 216 60% 7%;
-    --sidebar-accent: 210 30% 15%;
-    --sidebar-accent-foreground: 190 100% 95%;
-    --sidebar-border: 210 30% 18%;
-    --sidebar-ring: 190 100% 50%;
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 190 90% 40%;
+    --glow: 190 90% 40%;
   }
 }
 
