@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, Library, BarChart3, Users, Trophy,
   User as UserIcon, MessageCircle, LogOut, Sun, Moon, Globe, Crown,
+  UserPlus, Settings,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -21,10 +22,12 @@ export default function TopBar() {
     { to: "/books", icon: Library, label: t("books") },
     { to: "/analytics", icon: BarChart3, label: t("analytics") },
     { to: "/community", icon: Users, label: t("community") },
+    { to: "/friends", icon: UserPlus, label: t("friends") },
     { to: "/leaderboard", icon: Trophy, label: t("leaderboard") },
     { to: "/profile", icon: UserIcon, label: t("profile") },
     { to: "/ai-mentor", icon: MessageCircle, label: t("aiMentor") },
     { to: "/pricing", icon: Crown, label: t("pricing") },
+    { to: "/settings", icon: Settings, label: t("settings") },
   ];
 
   return (

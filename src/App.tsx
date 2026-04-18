@@ -18,6 +18,8 @@ import CommunityPage from "./pages/CommunityPage";
 import ProfilePage from "./pages/ProfilePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import PricingPage from "./pages/PricingPage";
+import FriendsPage from "./pages/FriendsPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +46,8 @@ const App = () => (
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/friends" element={<FriendsPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
