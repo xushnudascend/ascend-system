@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import {
   Shield, Flame, Zap, Brain, Target, TrendingUp,
-  CheckCircle2, Circle, Plus, Dumbbell,
+  CheckCircle2, Circle, Plus, Dumbbell, Trash2,
   DollarSign, Heart, GraduationCap, ChevronRight,
-  Calculator, MessageCircle, BarChart3,
+  Calculator, MessageCircle, BarChart3, Loader2,
 } from "lucide-react";
-import type { TestResult } from "@/data/onboardingQuestions";
 import { categories } from "@/data/courses";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import TopBar from "@/components/TopBar";
 
 interface Habit {
@@ -18,16 +19,17 @@ interface Habit {
   name: string;
   completed: boolean;
   difficulty: number;
-  xp: number;
+  xp_reward: number;
+  streak: number;
+  last_completed_at: string | null;
 }
 
-const defaultHabits: Habit[] = [
-  { id: '1', name: 'Ertalab 5:30 da turish', completed: false, difficulty: 3, xp: 30 },
-  { id: '2', name: '30 daqiqa sport', completed: false, difficulty: 4, xp: 40 },
-  { id: '3', name: 'Kitob o\'qish (30 min)', completed: false, difficulty: 2, xp: 20 },
-  { id: '4', name: 'Ijtimoiy tarmoqsiz 2 soat', completed: false, difficulty: 5, xp: 50 },
-  { id: '5', name: 'Sovuq dush', completed: false, difficulty: 3, xp: 30 },
-];
+interface Profile {
+  xp: number;
+  streak: number;
+  discipline_score: number;
+  rank: string;
+}
 
 const categoryIcons: Record<string, React.ReactNode> = {
   sport: <Dumbbell className="w-5 h-5" />,
@@ -38,100 +40,168 @@ const categoryIcons: Record<string, React.ReactNode> = {
   university: <GraduationCap className="w-5 h-5" />,
 };
 
+const seedHabits = [
+  { name: "Ertalab 5:30 da turish", difficulty: 3, xp_reward: 30 },
+  { name: "30 daqiqa sport", difficulty: 4, xp_reward: 40 },
+  { name: "Kitob o'qish (30 min)", difficulty: 2, xp_reward: 20 },
+  { name: "Ijtimoiy tarmoqsiz 2 soat", difficulty: 5, xp_reward: 50 },
+  { name: "Sovuq dush", difficulty: 3, xp_reward: 30 },
+];
+
 export default function DashboardPage() {
-  const { user, signOut } = useAuth();
-  const [profile, setProfile] = useState<TestResult | null>(null);
-  const [habits, setHabits] = useState<Habit[]>(() => {
-    const saved = localStorage.getItem('ascend_habits');
-    return saved ? JSON.parse(saved) : defaultHabits;
-  });
-  const [streak, setStreak] = useState(() => Number(localStorage.getItem('ascend_streak') || '0'));
-  const [totalXp, setTotalXp] = useState(() => Number(localStorage.getItem('ascend_xp') || '0'));
-  const [newHabit, setNewHabit] = useState('');
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [newHabit, setNewHabit] = useState("");
   const [showAddHabit, setShowAddHabit] = useState(false);
+  const [bmiWeight, setBmiWeight] = useState("");
+  const [bmiHeight, setBmiHeight] = useState("");
+  const [weekData, setWeekData] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
 
   useEffect(() => {
-    const p = localStorage.getItem('ascend_profile');
-    if (p) setProfile(JSON.parse(p));
-  }, []);
+    if (!authLoading && !user) navigate("/auth");
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    localStorage.setItem('ascend_habits', JSON.stringify(habits));
-  }, [habits]);
+    if (!user) return;
+    loadAll();
+  }, [user]);
+
+  const loadAll = async () => {
+    setLoading(true);
+    const [{ data: hs }, { data: pf }, { data: logs }] = await Promise.all([
+      supabase.from("habits").select("*").eq("user_id", user!.id).order("created_at"),
+      supabase.from("profiles").select("xp,streak,discipline_score,rank").eq("user_id", user!.id).maybeSingle(),
+      supabase.from("habit_logs").select("log_date,xp_earned").eq("user_id", user!.id)
+        .gte("log_date", new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)),
+    ]);
+
+    // Seed default habits if user has none
+    if (!hs || hs.length === 0) {
+      const inserted = await supabase.from("habits").insert(
+        seedHabits.map(h => ({ ...h, user_id: user!.id }))
+      ).select();
+      setHabits((inserted.data as Habit[]) || []);
+    } else {
+      // mark "completed" if last_completed_at is today
+      const today = new Date().toISOString().slice(0, 10);
+      setHabits(hs.map(h => ({ ...h, completed: h.last_completed_at?.slice(0, 10) === today })));
+    }
+
+    setProfile(pf || { xp: 0, streak: 0, discipline_score: 50, rank: "Beginner" });
+
+    // Build week data (last 7 days, today last)
+    const week = Array(7).fill(0);
+    const todayIdx = 6;
+    (logs || []).forEach(l => {
+      const daysAgo = Math.floor((Date.now() - new Date(l.log_date).getTime()) / 86400000);
+      const idx = todayIdx - daysAgo;
+      if (idx >= 0 && idx < 7) week[idx] += l.xp_earned;
+    });
+    setWeekData(week);
+    setLoading(false);
+  };
 
   const completedCount = habits.filter(h => h.completed).length;
   const completionRate = habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0;
-  const disciplineScore = profile ? Math.round(
-    (profile.disciplineScore * 0.4) + (completionRate * 0.3) + (Math.min(streak, 30) * 3.33 * 0.3)
-  ) : completionRate;
+  const xp = profile?.xp || 0;
+  const streak = profile?.streak || 0;
+  const disciplineScore = Math.min(100, Math.round(
+    completionRate * 0.5 + Math.min(streak, 30) * 3.33 * 0.3 + (xp / 50) * 0.2
+  ));
+  const level = Math.floor(xp / 200) + 1;
+  const xpInLevel = xp % 200;
+  const rank = disciplineScore >= 85 ? "Apex" : disciplineScore >= 65 ? "Elite" : disciplineScore >= 40 ? "Disciplined" : "Beginner";
+  const rankColor = rank === "Apex" ? "text-success" : rank === "Elite" ? "text-warning" : rank === "Disciplined" ? "text-primary" : "text-muted-foreground";
 
-  const level = Math.floor(totalXp / 200) + 1;
-  const xpInLevel = totalXp % 200;
-  const rank = disciplineScore >= 85 ? 'Apex' : disciplineScore >= 65 ? 'Elite' : disciplineScore >= 40 ? 'Disciplined' : 'Beginner';
-  const rankColor = rank === 'Apex' ? 'text-success' : rank === 'Elite' ? 'text-warning' : rank === 'Disciplined' ? 'text-primary' : 'text-muted-foreground';
+  const toggleHabit = async (h: Habit) => {
+    if (h.completed) return; // No "untoggle" — keep streak honest
+    const today = new Date().toISOString();
+    const newStreak = h.streak + 1;
 
-  const toggleHabit = (id: string) => {
-    setHabits(prev => prev.map(h => {
-      if (h.id === id) {
-        if (!h.completed) {
-          setTotalXp(x => { const n = x + h.xp; localStorage.setItem('ascend_xp', String(n)); return n; });
-        }
-        return { ...h, completed: !h.completed };
-      }
-      return h;
-    }));
+    // Optimistic UI
+    setHabits(prev => prev.map(x => x.id === h.id ? { ...x, completed: true, streak: newStreak } : x));
+    const newXp = xp + h.xp_reward;
+    setProfile(p => p ? { ...p, xp: newXp, streak: Math.max(p.streak, newStreak), rank } : p);
+
+    await Promise.all([
+      supabase.from("habits").update({
+        completed: true, last_completed_at: today, streak: newStreak,
+      }).eq("id", h.id),
+      supabase.from("habit_logs").insert({
+        user_id: user!.id, habit_id: h.id, xp_earned: h.xp_reward,
+      }),
+      supabase.from("profiles").update({
+        xp: newXp, streak: Math.max(streak, newStreak),
+        discipline_score: disciplineScore, rank,
+      }).eq("user_id", user!.id),
+    ]);
+
+    toast({ title: `+${h.xp_reward} XP`, description: `Streak: ${newStreak} kun 🔥` });
   };
 
-  const addHabit = () => {
+  const addHabit = async () => {
     if (!newHabit.trim()) return;
-    setHabits(prev => [...prev, { id: Date.now().toString(), name: newHabit.trim(), completed: false, difficulty: 3, xp: 30 }]);
-    setNewHabit('');
-    setShowAddHabit(false);
+    const { data } = await supabase.from("habits").insert({
+      user_id: user!.id, name: newHabit.trim(), difficulty: 3, xp_reward: 30,
+    }).select().single();
+    if (data) setHabits(prev => [...prev, { ...data, completed: false } as Habit]);
+    setNewHabit(""); setShowAddHabit(false);
   };
 
-  // BMI Calculator state
-  const [bmiWeight, setBmiWeight] = useState('');
-  const [bmiHeight, setBmiHeight] = useState('');
+  const deleteHabit = async (id: string) => {
+    await supabase.from("habits").delete().eq("id", id);
+    setHabits(prev => prev.filter(h => h.id !== id));
+  };
+
   const bmi = bmiWeight && bmiHeight ? (Number(bmiWeight) / ((Number(bmiHeight) / 100) ** 2)).toFixed(1) : null;
-  const bmiCategory = bmi ? (Number(bmi) < 18.5 ? 'Kam vazn' : Number(bmi) < 25 ? 'Normal' : Number(bmi) < 30 ? 'Ortiqcha vazn' : 'Semizlik') : null;
-  const bmiColor = bmiCategory === 'Normal' ? 'text-success' : bmiCategory === 'Kam vazn' || bmiCategory === 'Ortiqcha vazn' ? 'text-warning' : 'text-destructive';
+  const bmiCategory = bmi ? (Number(bmi) < 18.5 ? "Kam vazn" : Number(bmi) < 25 ? "Normal" : Number(bmi) < 30 ? "Ortiqcha vazn" : "Semizlik") : null;
+  const bmiColor = bmiCategory === "Normal" ? "text-success" : bmiCategory === "Kam vazn" || bmiCategory === "Ortiqcha vazn" ? "text-warning" : "text-destructive";
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const maxWeek = Math.max(...weekData, 50);
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <TopBar />
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-        {/* Bento Grid - Top Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Discipline Score */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             className="col-span-2 p-6 rounded-2xl border border-border bg-card glow-border">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm text-muted-foreground flex items-center gap-1"><Shield className="w-4 h-4" /> Intizom balli</p>
               <span className={`font-heading text-sm font-bold ${rankColor}`}>{rank}</span>
             </div>
-            <p className="font-heading text-5xl font-bold glow-text animate-score-count">{disciplineScore}</p>
+            <p className="font-heading text-5xl font-bold glow-text">{disciplineScore}</p>
             <Progress value={disciplineScore} className="h-2 mt-3" />
           </motion.div>
 
-          {/* Streak */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             className="p-6 rounded-2xl border border-border bg-card">
             <p className="text-sm text-muted-foreground flex items-center gap-1"><Flame className="w-4 h-4" /> Streak</p>
-            <p className={`font-heading text-4xl font-bold mt-1 ${streak < 3 ? 'text-destructive' : 'text-success'}`}>
+            <p className={`font-heading text-4xl font-bold mt-1 ${streak < 3 ? "text-destructive" : "text-success"}`}>
               {streak}<span className="text-lg">kun</span>
             </p>
           </motion.div>
 
-          {/* XP & Level */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
             className="p-6 rounded-2xl border border-border bg-card">
             <p className="text-sm text-muted-foreground flex items-center gap-1"><Zap className="w-4 h-4" /> Level {level}</p>
-            <p className="font-heading text-2xl font-bold text-xp mt-1">{totalXp} XP</p>
+            <p className="font-heading text-2xl font-bold text-xp mt-1">{xp} XP</p>
             <Progress value={(xpInLevel / 200) * 100} className="h-1.5 mt-2" />
           </motion.div>
         </div>
 
-        {/* Today's Habits */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
           className="rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center justify-between mb-4">
@@ -142,17 +212,23 @@ export default function DashboardPage() {
           </div>
           <div className="space-y-2">
             {habits.map(h => (
-              <button key={h.id} onClick={() => toggleHabit(h.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${h.completed ? 'bg-success/10 border border-success/20' : 'bg-card border border-border hover:border-primary/30'}`}>
-                {h.completed ? <CheckCircle2 className="w-5 h-5 text-success shrink-0" /> : <Circle className="w-5 h-5 text-muted-foreground shrink-0" />}
-                <span className={`text-sm flex-1 text-left ${h.completed ? 'line-through text-muted-foreground' : ''}`}>{h.name}</span>
-                <span className="text-xs text-xp">+{h.xp} XP</span>
-              </button>
+              <div key={h.id}
+                className={`group w-full flex items-center gap-3 p-3 rounded-xl transition-all ${h.completed ? "bg-success/10 border border-success/20" : "bg-card border border-border hover:border-primary/30"}`}>
+                <button onClick={() => toggleHabit(h)} disabled={h.completed} className="shrink-0">
+                  {h.completed ? <CheckCircle2 className="w-5 h-5 text-success" /> : <Circle className="w-5 h-5 text-muted-foreground" />}
+                </button>
+                <span className={`text-sm flex-1 text-left ${h.completed ? "line-through text-muted-foreground" : ""}`}>{h.name}</span>
+                {h.streak > 0 && <span className="text-xs text-warning flex items-center gap-0.5"><Flame className="w-3 h-3" />{h.streak}</span>}
+                <span className="text-xs text-xp">+{h.xp_reward}</span>
+                <button onClick={() => deleteHabit(h.id)} className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                </button>
+              </div>
             ))}
           </div>
           {showAddHabit ? (
             <div className="flex gap-2 mt-3">
-              <input value={newHabit} onChange={e => setNewHabit(e.target.value)} onKeyDown={e => e.key === 'Enter' && addHabit()}
+              <input value={newHabit} onChange={e => setNewHabit(e.target.value)} onKeyDown={e => e.key === "Enter" && addHabit()}
                 placeholder="Yangi odat..." className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" autoFocus />
               <button onClick={addHabit} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium">Qo'shish</button>
             </div>
@@ -164,7 +240,6 @@ export default function DashboardPage() {
           )}
         </motion.div>
 
-        {/* BMI Calculator */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
           className="rounded-2xl border border-border bg-card p-6">
           <h2 className="font-heading text-lg font-bold flex items-center gap-2 mb-4">
@@ -191,7 +266,6 @@ export default function DashboardPage() {
           )}
         </motion.div>
 
-        {/* AI Mentor Quick Access */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
           className="rounded-2xl border border-primary/30 bg-card p-6 glow-border">
           <Link to="/ai-mentor" className="flex items-center justify-between group">
@@ -208,7 +282,6 @@ export default function DashboardPage() {
           </Link>
         </motion.div>
 
-        {/* Categories / Sections */}
         <div>
           <h2 className="font-heading text-xl font-bold mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-primary" /> Bo'limlar
@@ -230,21 +303,24 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Weekly Progress placeholder */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
           className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="font-heading text-lg font-bold flex items-center gap-2 mb-4">
-            <BarChart3 className="w-5 h-5 text-primary" /> Haftalik progress
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-heading text-lg font-bold flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-primary" /> Haftalik XP
+            </h2>
+            <Link to="/analytics" className="text-xs text-primary hover:underline">Batafsil →</Link>
+          </div>
           <div className="flex items-end gap-2 h-32">
-            {['Du', 'Se', 'Cho', 'Pa', 'Ju', 'Sh', 'Ya'].map((d, i) => {
-              const val = i < new Date().getDay() ? Math.random() * 80 + 20 : 0;
+            {["Du", "Se", "Cho", "Pa", "Ju", "Sh", "Ya"].map((d, i) => {
+              const val = (weekData[i] / maxWeek) * 100;
               return (
                 <div key={d} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full rounded-t-lg bg-primary/20 relative" style={{ height: `${val}%` }}>
-                    <div className="absolute bottom-0 w-full rounded-t-lg bg-primary transition-all" style={{ height: `${val * 0.7}%` }} />
+                  <div className="w-full rounded-t-lg bg-primary/20 relative" style={{ height: `${Math.max(val, 4)}%` }}>
+                    <div className="absolute bottom-0 w-full rounded-t-lg bg-primary transition-all" style={{ height: "100%" }} />
                   </div>
                   <span className="text-xs text-muted-foreground">{d}</span>
+                  <span className="text-[10px] text-xp">{weekData[i]}</span>
                 </div>
               );
             })}

@@ -19,6 +19,7 @@ const dict: Record<Lang, Record<string, string>> = {
     pricing: "Narxlar", free: "Bepul", premium: "Premium",
     upgrade: "Premium-ga o'tish", login: "Kirish", signup: "Ro'yxatdan o'tish",
     home: "Bosh sahifa", start: "Boshlash", continue: "Davom etish",
+    friends: "Do'stlar", settings: "Sozlamalar",
   },
   en: {
     dashboard: "Dashboard", courses: "Courses", books: "Library",
@@ -36,6 +37,7 @@ const dict: Record<Lang, Record<string, string>> = {
     pricing: "Pricing", free: "Free", premium: "Premium",
     upgrade: "Upgrade to Premium", login: "Sign in", signup: "Sign up",
     home: "Home", start: "Start", continue: "Continue",
+    friends: "Friends", settings: "Settings",
   },
   ru: {
     dashboard: "Дашборд", courses: "Курсы", books: "Библиотека",
@@ -53,6 +55,7 @@ const dict: Record<Lang, Record<string, string>> = {
     pricing: "Цены", free: "Бесплатно", premium: "Премиум",
     upgrade: "Перейти на Премиум", login: "Войти", signup: "Регистрация",
     home: "Главная", start: "Старт", continue: "Продолжить",
+    friends: "Друзья", settings: "Настройки",
   },
   tr: {
     dashboard: "Pano", courses: "Kurslar", books: "Kütüphane",
@@ -70,6 +73,7 @@ const dict: Record<Lang, Record<string, string>> = {
     pricing: "Fiyatlar", free: "Ücretsiz", premium: "Premium",
     upgrade: "Premium'a geç", login: "Giriş", signup: "Kayıt ol",
     home: "Anasayfa", start: "Başla", continue: "Devam",
+    friends: "Arkadaşlar", settings: "Ayarlar",
   },
 };
 
