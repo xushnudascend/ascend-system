@@ -4,13 +4,14 @@ import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import {
   Shield, Flame, Zap, Brain, Target, TrendingUp,
-  CheckCircle2, Circle, Plus, BookOpen, Dumbbell,
+  CheckCircle2, Circle, Plus, Dumbbell,
   DollarSign, Heart, GraduationCap, ChevronRight,
-  Calculator, MessageCircle, BarChart3, LogOut
+  Calculator, MessageCircle, BarChart3,
 } from "lucide-react";
 import type { TestResult } from "@/data/onboardingQuestions";
 import { categories } from "@/data/courses";
 import { useAuth } from "@/hooks/useAuth";
+import TopBar from "@/components/TopBar";
 
 interface Habit {
   id: string;
@@ -97,27 +98,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Top bar */}
-      <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3">
-        <div className="flex items-center justify-between max-w-5xl mx-auto">
-          <span className="font-heading text-lg font-bold">ASCEND<span className="text-primary">.</span></span>
-          <div className="flex items-center gap-3 text-sm">
-            <Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-              <BookOpen className="w-4 h-4" /> Kurslar
-            </Link>
-            <Link to="/books" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-              <BookOpen className="w-4 h-4" /> Kitoblar
-            </Link>
-            <Link to="/analytics" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-              <BarChart3 className="w-4 h-4" /> Analitika
-            </Link>
-            <button onClick={() => signOut()} className="text-muted-foreground hover:text-destructive transition-colors">
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </nav>
-
+      <TopBar />
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
         {/* Bento Grid - Top Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
