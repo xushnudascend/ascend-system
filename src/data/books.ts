@@ -304,7 +304,9 @@ extraTitles.forEach(([title, author, idea]) => {
   });
 });
 
-export const books: Book[] = [...seedBooks, ...generated];
+import { extraBooks, extraQuotes, extraEssays } from './booksExtra';
+
+export const books: Book[] = [...seedBooks, ...generated, ...extraBooks];
 
 export const quotes: Quote[] = [
   { id: '1', text: "Intizom — kayfiyatdan qat'i nazar bajarishdir.", author: "Jocko Willink", category: 'Intizom' },
@@ -357,6 +359,7 @@ export const quotes: Quote[] = [
   { id: '48', text: "Soat 5da turish — kun ustida hokim bo'lish.", author: "Robin Sharma", category: 'Intizom' },
   { id: '49', text: "Eng qiyin qism — boshlash. Davom etish — odat.", author: "Noma'lum", category: 'Intizom' },
   { id: '50', text: "Mukammallik dushmandir. Bajarilgan — yaxshi.", author: "Sheryl Sandberg", category: 'Biznes' },
+  ...extraQuotes,
 ];
 
 export const essays: Essay[] = [
@@ -400,4 +403,5 @@ export const essays: Essay[] = [
     excerpt: "Zaif tana — zaif qarorlar. Mushaklaringiz energiya zavodi, miyangiz uchun ham. Haftada 3x kuch mashqi — depressiyani 40% kamaytiradi (Harvard tadqiqot). Sport — eng arzon antidepressant.",
     actions: ["Bugun 30 daqiqa yurish", "Haftada 3 marta kuch mashqi", "Suv: kuniga 3 litr, qand: 0"],
   },
+  ...extraEssays,
 ];
