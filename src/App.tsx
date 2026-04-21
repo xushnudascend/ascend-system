@@ -21,6 +21,11 @@ import PricingPage from "./pages/PricingPage";
 import FriendsPage from "./pages/FriendsPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import BuddiesPage from "./pages/BuddiesPage";
+import MethodsPage from "./pages/MethodsPage";
+import CalmPage from "./pages/CalmPage";
+import CharactersPage from "./pages/CharactersPage";
+import DecisionHubPage from "./pages/DecisionHubPage";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +53,11 @@ const App = () => (
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/friends" element={<FriendsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/buddies" element={<BuddiesPage />} />
+                <Route path="/methods" element={<MethodsPage />} />
+                <Route path="/calm" element={<CalmPage />} />
+                <Route path="/characters" element={<CharactersPage />} />
+                <Route path="/decision-hub" element={<DecisionHubPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
