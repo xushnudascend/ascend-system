@@ -359,6 +359,7 @@ export const quotes: Quote[] = [
   { id: '48', text: "Soat 5da turish — kun ustida hokim bo'lish.", author: "Robin Sharma", category: 'Intizom' },
   { id: '49', text: "Eng qiyin qism — boshlash. Davom etish — odat.", author: "Noma'lum", category: 'Intizom' },
   { id: '50', text: "Mukammallik dushmandir. Bajarilgan — yaxshi.", author: "Sheryl Sandberg", category: 'Biznes' },
+  ...extraQuotes,
 ];
 
 export const essays: Essay[] = [
