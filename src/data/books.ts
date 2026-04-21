@@ -403,4 +403,5 @@ export const essays: Essay[] = [
     excerpt: "Zaif tana — zaif qarorlar. Mushaklaringiz energiya zavodi, miyangiz uchun ham. Haftada 3x kuch mashqi — depressiyani 40% kamaytiradi (Harvard tadqiqot). Sport — eng arzon antidepressant.",
     actions: ["Bugun 30 daqiqa yurish", "Haftada 3 marta kuch mashqi", "Suv: kuniga 3 litr, qand: 0"],
   },
+  ...extraEssays,
 ];
