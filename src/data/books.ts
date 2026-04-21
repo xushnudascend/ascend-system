@@ -304,7 +304,9 @@ extraTitles.forEach(([title, author, idea]) => {
   });
 });
 
-export const books: Book[] = [...seedBooks, ...generated];
+import { extraBooks, extraQuotes, extraEssays } from './booksExtra';
+
+export const books: Book[] = [...seedBooks, ...generated, ...extraBooks];
 
 export const quotes: Quote[] = [
   { id: '1', text: "Intizom — kayfiyatdan qat'i nazar bajarishdir.", author: "Jocko Willink", category: 'Intizom' },
