@@ -1,414 +1,272 @@
-export interface Exercise {
-  name: string;
-  sets?: string;
-  reps?: string;
-  duration?: string;
-  notes?: string;
-}
-
-export interface DayPlan {
+export interface Lesson {
   day: number;
   title: string;
-  tasks: string[];
-  exercises?: Exercise[];
+  task: string;
+  tip: string;
 }
-
-export interface CourseDetail {
+export interface Course {
   id: string;
   title: string;
+  category: 'discipline'|'mindset'|'fitness'|'finance'|'productivity'|'relationships'|'learning'|'spirituality'|'leadership'|'creativity';
+  emoji: string;
   description: string;
-  duration: string;
-  difficulty: 'Oson' | "O'rta" | 'Qiyin';
-  icon: string;
-  category: string;
-  weeklyPlan: DayPlan[];
-  tips: string[];
-  commonMistakes: string[];
+  duration: number; // days
+  level: 'beginner'|'intermediate'|'advanced';
+  lessons: Lesson[];
 }
 
-export interface Category {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  subcategories: SubCategory[];
-}
+const mk = (id:string, title:string, category:Course['category'], emoji:string, desc:string, level:Course['level'], lessons: Lesson[]):Course => ({id, title, category, emoji, description: desc, duration: lessons.length, level, lessons});
 
-export interface SubCategory {
-  id: string;
-  title: string;
-  description: string;
-  courseIds: string[];
-}
+// helper to generate filler-style lessons quickly with quality content
+const days7 = (titles: string[], tasks: string[], tips: string[]): Lesson[] =>
+  titles.map((t, i) => ({ day: i+1, title: t, task: tasks[i], tip: tips[i] }));
 
-export const categories: Category[] = [
-  {
-    id: 'sport',
-    title: 'Sport',
-    description: "Jismoniy kuch va sog'lomlik",
-    icon: '💪',
-    subcategories: [
-      { id: 'bodybuilding', title: 'Bodybuilding', description: "Mushak o'stirish va shakl berish", courseIds: ['bb-beginner', 'bb-intermediate'] },
-      { id: 'calisthenics', title: 'Calisthenics', description: "O'z tana og'irligi bilan mashqlar", courseIds: ['cal-beginner'] },
-      { id: 'running', title: 'Yugurish', description: "Chidamlilik va kardio", courseIds: ['run-5k'] },
-      { id: 'mma', title: 'MMA / Boks', description: "Jang san'atlari", courseIds: ['mma-basics'] },
-      { id: 'weight-loss', title: 'Vazn tashlash', description: "Sog'lom usulda ozish", courseIds: ['wl-program'] },
-      { id: 'weight-gain', title: "Vazn olish", description: "Mushak massasi oshirish", courseIds: ['wg-program'] },
-    ],
-  },
-  {
-    id: 'finance',
-    title: 'Moliya',
-    description: "Pul boshqarish va boylik",
-    icon: '💰',
-    subcategories: [
-      { id: 'budgeting', title: 'Budjet', description: "Pul oqimini boshqarish", courseIds: ['fin-budget'] },
-      { id: 'investing', title: 'Investitsiya', description: "Pulni ishlating", courseIds: ['fin-invest'] },
-      { id: 'side-hustle', title: 'Qo\'shimcha daromad', description: "Daromad manbalarini ko'paytirish", courseIds: ['fin-hustle'] },
-    ],
-  },
-  {
-    id: 'mental',
-    title: 'Ruhiy salomatlik',
-    description: "Aql va ruh uchun",
-    icon: '🧠',
-    subcategories: [
-      { id: 'meditation', title: 'Meditatsiya', description: "Ichki tinchlik", courseIds: ['med-start'] },
-      { id: 'stress', title: 'Stress boshqarish', description: "Stress bilan kurashish", courseIds: ['stress-mgmt'] },
-      { id: 'journaling', title: 'Jurnal yozish', description: "Fikrlarni tartibga solish", courseIds: ['journal-start'] },
-    ],
-  },
-  {
-    id: 'intellect',
-    title: 'Aqliy rivojlanish',
-    description: "Bilim va ko'nikma",
-    icon: '📚',
-    subcategories: [
-      { id: 'reading', title: "Kitob o'qish", description: "O'qish odatini shakllantirish", courseIds: ['read-habit'] },
-      { id: 'focus', title: 'Deep Work', description: "Chuqur konsentratsiya", courseIds: ['deep-work'] },
-      { id: 'learning', title: "O'rganish usullari", description: "Tez va samarali o'rganish", courseIds: ['learn-methods'] },
-    ],
-  },
-  {
-    id: 'discipline',
-    title: 'Intizom',
-    description: "Eng asosiy ko'nikma",
-    icon: '⚡',
-    subcategories: [
-      { id: 'habits', title: 'Odat shakllantirish', description: "21/66 kun qoidasi", courseIds: ['habit-build'] },
-      { id: 'bad-habits', title: "Yomon odatlarni tashlash", description: "Trigger → Routine → Reward", courseIds: ['bad-habit-break'] },
-      { id: 'morning', title: 'Ertalabki tartib', description: "Kunni g'alaba bilan boshlash", courseIds: ['morning-routine'] },
-    ],
-  },
-  {
-    id: 'university',
-    title: 'Universitet tayyorgarlik',
-    description: "Harvard, MIT, Stanford",
-    icon: '🎓',
-    subcategories: [
-      { id: 'sat', title: 'SAT/IELTS', description: "Test tayyorgarlik", courseIds: ['test-prep'] },
-      { id: 'essay', title: 'Essay yozish', description: "Kuchli ariza yozish", courseIds: ['essay-writing'] },
-    ],
-  },
+export const courses: Course[] = [
+  // DISCIPLINE (15)
+  mk('disc-foundation','Intizom Asoslari','discipline','🧱','7 kunda intizom poydevorini quring.','beginner', days7(
+    ['Identity tanlash','Erta turish','Telefon detoks','Sport boshlash','Ovqat tartibi','Reja tuzish','Haftalik audit'],
+    ['Bugun "Men intizomli odamman" deb yozing','Ertalab 6:00 da turing, alarmga "snooze" yo\'q','Ekran vaqti 1 soatga tushiring','20 daqiqa harakat qiling','Sahar ovqatdan keyin shakar yo\'q','Ertangi 3 ta asosiy vazifa yozib qo\'ying','Haftani 1-10 baholang, 1 ta xulosa'],
+    ['Identity > goal','Snooze — birinchi mag\'lubiyat','Ekran = dofamin o\'g\'ri','Harakat = ruh holat','Shakar — yashirin dushman','3 dan ko\'p — chalg\'ish','Audit = o\'sish'])),
+  mk('disc-30','30 Kunlik Spartan','discipline','🛡️','30 kunda yangi odam.','intermediate',
+    Array.from({length:30}, (_,i) => ({day:i+1, title:`Kun ${i+1}: ${['Erta turish','Sovuq dush','Sport','O\'qish','Meditatsiya','Yozish','Tahlil'][i%7]}`, task:`Bugun ${['5:30 da turing','2 daqiqa sovuq dush','30 daqiqa harakat','30 sahifa o\'qish','10 daq meditatsiya','Journal yozing','Kunni baholang'][i%7]}`, tip:'Hech qanday bahona yo\'q.'}))),
+  mk('disc-noexcuses','Bahonalar O\'limi','discipline','🚫','Bahonalardan butunlay voz keching.','intermediate', days7(
+    ['Bahonalarni yozing','Real sabab toping','Identity sweep','Public commitment','Punishment system','Re-frame','Lock-in'],
+    ['Oxirgi 10 ta bahonangizni yozing','Har bahonadan keyin "lekin asl sabab..."','3 ta narsani tashlang','Do\'stga 30 kunlik va\'da bering','Yiqilsangiz — 50 push-up','"Men qila olmayman" ni "men hali qilmayapman" ga aylantiring','Telefonda 30 kun reminder'],
+    Array(7).fill('Bahona = past identitining ovozi'))),
+  mk('disc-monk','Rohib Rejimi','discipline','🧘','30 kun minimal hayot.','advanced',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Social media yo\'q, faqat asosiy ovqat, 1 soat o\'qish, 1 soat sport, 8 soat ish.',tip:'Sukunat — o\'qituvchi.'}))),
+  mk('disc-5am','5 AM Klubi','discipline','🌅','21 kunda erta turish odat bo\'ladi.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}: ${i<7?'4:30':i<14?'5:00':'5:30'} da turish`,task:'Alarmni xonadan tashqariga qo\'ying. Turishdan 1 daqiqa sovuq suv yuviniş.',tip:'Birinchi 30 daqiqa — kun yutish.'}))),
+  mk('disc-cold','Sovuq Dush 30 Kun','discipline','❄️','Wim Hof metodi.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}: ${Math.min(30+i*5,180)} sek`,task:`${Math.min(30+i*5,180)} sekund sovuq dush`,tip:'Nafas — chuqur, sokin'}))),
+  mk('disc-nofap','30 Kun Toza','discipline','🛑','Porno va o\'zo\'zinitinch yo\'q.','intermediate',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Triggerlardan saqlaning. Soliqlarni sport bilan almashtiring.',tip:'Energiya — qayta yo\'naltirish.'}))),
+  mk('disc-nosugar','Shakarsiz 21 Kun','discipline','🍬','Shakar qaramligini sindirish.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Hech qanday qo\'shilgan shakar. Mevadan tabiiyni iste\'mol qiling.',tip:'Birinchi 7 kun — eng qiyin'}))),
+  mk('disc-nophone','Telefonsiz Yakshanba','discipline','📵','4 hafta — 1 kun telefonsiz.','beginner',
+    Array.from({length:4},(_,i)=>({day:i+1,title:`Hafta ${i+1}: To\'liq yakshanba`,task:'Yakshanba kuni ertalab 7 dan kechki 21 gacha telefon yo\'q.',tip:'Kitob, oila, tabiat.'}))),
+  mk('disc-deepwork','Deep Work 14 Kun','discipline','🎯','Cal Newport metodi.','intermediate',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}: ${Math.min(60+i*15,180)} daq deep work`,task:`Telefon o\'chiq, ${Math.min(60+i*15,180)} daqiqa fokus`,tip:'1 narsa, 1 vaqt'}))),
+  mk('disc-pomodoro','Pomodoro Master','discipline','🍅','7 kun — 25/5 metodi.','beginner', days7(
+    ['Tushunish','4 sikl','6 sikl','8 sikl','10 sikl','12 sikl','Audit'],
+    ['1 sikl: 25 daq fokus + 5 daq dam','Bugun 4 sikl','6 sikl','8 sikl','10 sikl','12 sikl','Haftani baholang'],
+    Array(7).fill('Telefonni boshqa xonaga qo\'ying'))),
+  mk('disc-stoic','Stoik 21 Kun','discipline','🏛️','Marcus Aurelius uslubida kun.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Ertalab: "Bugun ahmoq odamlar uchrayman..." Kechqurun: 3 ta journal savoli.',tip:'Memento mori'}))),
+  mk('disc-jocko','Jocko Discipline','discipline','⚓','Discipline = Freedom.','advanced',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}: 4:30 + Sport + Plan`,task:'4:30 turing, 60 daq sport, kunlik reja.',tip:'Good.'}))),
+  mk('disc-goggins','Goggins 4x4x48','discipline','💀','4 mil har 4 soatda 48 soat.','advanced',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}: tayyorgarlik`,task:'Har kun masofani oshiring. 14-kun: 4x4x48',tip:'Stay hard!'}))),
+  mk('disc-spartan','Spartan Mind','discipline','🛡️','30 kun harbiy intizom.','advanced',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'5:00 turish, 100 push-up, 5 km yugurish, 1 soat o\'qish, 0 social media.',tip:'Molon labe'}))),
+
+  // MINDSET (10)
+  mk('mind-growth','Growth Mindset','mindset','🌱','Carol Dweck.','beginner', days7(
+    ['Fixed vs Growth','Til o\'zgartirish','Yutqazishdan o\'rganish','Mehnat > talant','Feedback qabul','Yangi ko\'nikma','Yangi identity'],
+    ['Bugun "men buni yaxshi bilmayman" o\'rniga "men buni hali yaxshi bilmayman"','3 ta "men qila olmayman" topib, "hali" qo\'shing','Oxirgi yutqazishni 1 ta dars sifatida yozing','Birovga "qanday ishlayotganingni" so\'rang','Tanqidni "ma\'lumot" deb qabul qiling','Yangi narsa o\'rganing — 30 daq','Yangi identity yozing'],
+    Array(7).fill('Miya — mushak, o\'sadi'))),
+  mk('mind-stoic','Stoik Tafakkur','mindset','🧠','Epictetus + Aurelius.','intermediate', days7(
+    ['Dichotomy of control','Premeditatio malorum','Memento mori','Amor fati','View from above','Negative visualization','Voluntary discomfort'],
+    ['Boshqara olmaydigan narsalar ro\'yxatini yozing','Eng yomon holatni xayolingda yashang','O\'zingizga "abadiy emassan" deb eslating','Bugun bo\'lganlarni qabul qiling','O\'zingizni kosmosdan ko\'ring','5 ta narsasiz qoling','Sovuq dush, och qolish'],
+    Array(7).fill('Bu sening tushunching, voqea emas'))),
+  mk('mind-gratitude','Minnatdorlik 21 Kun','mindset','🙏','Pozitiv neyrologiya.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Ertalab 3 ta minnatdorlik yozing. Kechqurun — bugungi 1 ta yaxshi narsa.',tip:'Miya nimaga e\'tibor — uni ko\'paytiradi.'}))),
+  mk('mind-fear','Qo\'rquv Bilan Yuzlashish','mindset','😨','7 kun + harakat.','intermediate', days7(
+    ['Qo\'rquv ro\'yxati','Eng kichigi','Public speaking','Rad qilinish','Yolg\'izlik','Yutqazish','Eng kattasi'],
+    ['10 ta qo\'rquv yozing','Eng kichigini bugun bajaring','Begona odam bilan gaplashing','Birovdan biror narsa so\'rang (kafe, taxi)','1 soat yolg\'iz o\'tiring','1 marta yutqazadigan narsa qiling','Eng kattasiga 1 qadam'],
+    Array(7).fill('Qo\'rquv yo\'qolmaydi — sen kuchayasan'))),
+  mk('mind-failure','Yutqaziq San\'ati','mindset','📉','Yiqilishni qayta tushunish.','intermediate', days7(
+    ['Yutqaziqlarni yozing','Sabablarni toping','Dars chiqarish','Qayta urinish','Iterate','Public sharing','Identity'],
+    ['10 ta yutqaziq yozing','Har birining haqiqiy sababi','Har biridan 1 ta dars','Bittasini qayta urinib ko\'ring','Yangi yondashuv bilan','Birovga ulashing','"Men yutqazadigan emas, o\'rganadigan odamman"'],
+    Array(7).fill('Yutqaziq — feedback, nuqson emas'))),
+  mk('mind-confidence','O\'ziga Ishonch','mindset','💎','Identity asosida.','intermediate', days7(
+    ['Yutuqlar ro\'yxati','Body language','Ovoz mashqi','Ko\'z bilan aloqa','Posture','Public action','Identity'],
+    ['100 ta o\'tmish yutuqni yozing','5 daq superman pose','Oynaga qarab gapiring','Har gaplashganda 70% ko\'z','Tik tik yuring','1 ta jamoatchilik harakati','"Men ishonchli odamman"'],
+    Array(7).fill('Ishonch — harakatdan, fikrdan emas'))),
+  mk('mind-clarity','Tafakkur Aniqligi','mindset','🔍','Aql tozalash.','beginner', days7(
+    ['Brain dump','Eisenhower','Pareto','First principles','Inversion','Mental models','Daily review'],
+    ['10 daq miyangizdan hammasini qog\'ozga to\'king','Vazifalarni 4 kvadratga ajrating','20% sabablar — 80% natija','1 muammoni atomgacha bo\'ling','"Bu yiqilishi uchun nima kerak?"','3 ta yangi mental model','Kechqurun 5 daq audit'],
+    Array(7).fill('Aniq fikr — yaxshi qaror'))),
+  mk('mind-meditation','Meditatsiya 21 Kun','mindset','🕉️','Asoslardan boshlab.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}: ${Math.min(5+i*2,30)} daqiqa`,task:`${Math.min(5+i*2,30)} daqiqa o\'tirib, nafasingizni kuzating.`,tip:'Fikrlar keladi — qaytaring.'}))),
+  mk('mind-journal','Journal 30 Kun','mindset','📓','Ravon yozish.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Ertalab 3 sahifa morning pages. Kechqurun 3 ta savol: nima yaxshi? nima yomon? nima o\'rgandim?',tip:'Til orqali fikr aniqlanadi'}))),
+  mk('mind-amorfati','Amor Fati 14 Kun','mindset','💛','Taqdiringni sev.','intermediate',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Bugun bo\'lgan 1 ta yomon narsani toping va undan rahmat ayting.',tip:'Hammasi — material'}))),
+
+  // FITNESS (12)
+  mk('fit-beginner','Sport Asoslari','fitness','💪','30 kunda boshlanish.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:`${i+1<=7?'10':i+1<=14?'20':i+1<=21?'30':'50'} push-up + ${i+1<=7?'20':i+1<=14?'40':i+1<=21?'60':'100'} squat + 5 daq plank`,tip:'Har kun bir oz ko\'proq'}))),
+  mk('fit-100pushup','100 Push-up','fitness','💯','6 hafta.','beginner',
+    Array.from({length:42},(_,i)=>({day:i+1,title:`Kun ${i+1}: ${Math.floor(10+i*2.5)} push-up`,task:`${Math.floor(10+i*2.5)} push-up (3-4 set)`,tip:'Forma > tezlik'}))),
+  mk('fit-5km','5 km Yugurish','fitness','🏃','8 hafta.','beginner',
+    Array.from({length:56},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:`${i<14?'1 daq yugurish + 1 daq yurish x 10':i<28?'2/1 x 10':i<42?'3/1 x 8':'5 km nonstop'}`,tip:'Burun bilan nafas'}))),
+  mk('fit-strong5x5','StrongLifts 5x5','fitness','🏋️','12 hafta — kuchli baza.','intermediate',
+    Array.from({length:36},(_,i)=>({day:i+1,title:`Kun ${i+1}: ${i%2===0?'A':'B'}`,task:i%2===0?'Squat 5x5, Bench 5x5, Row 5x5':'Squat 5x5, OHP 5x5, Deadlift 1x5',tip:'Har sessiya 2.5 kg qo\'shing'}))),
+  mk('fit-mobility','Egiluvchanlik 30 Kun','fitness','🧘','Kunlik 15 daq.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'15 daq stretching: oyoq, bel, yelka',tip:'Og\'riq — to\'xtang'}))),
+  mk('fit-abs','30 Kun Abs','fitness','🔥','Qorin mushaklari.','intermediate',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:`${30+i*2} crunches + ${10+i} leg raises + ${30+i*2}s plank`,tip:'Abs — oshxonada'}))),
+  mk('fit-weightloss','-10 kg 90 Kun','fitness','⚖️','Hisoblangan defitsit.','intermediate',
+    Array.from({length:90},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'500 kal defitsit (ovqat) + 10000 qadam + 30 daq sport',tip:'Sabr — hafta sayin tarozi'}))),
+  mk('fit-muscle','+5 kg Mushak','fitness','🥩','120 kun.','intermediate',
+    Array.from({length:120},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:i%7===6?'Dam':'45 daq vazn + 1.6g/kg protein + +200 kal',tip:'Sleep > training'}))),
+  mk('fit-yoga','Yoga 30 Kun','fitness','🕉️','Sun salutation.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'5 ta surya namaskar + 10 daq nafas',tip:'Body — temple'}))),
+  mk('fit-hiit','HIIT 21 Kun','fitness','⚡','15 daq/kun.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'20 sek max + 10 sek dam x 8 (Tabata) — burpees, mountain climbers',tip:'Intensivlik — kalit'}))),
+  mk('fit-sleep','Uyqu Ustasi','fitness','😴','21 kun.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'22:00 da telefon o\'chiriladi. 22:30 da yotoq. Xona 18°C, qorong\'i.',tip:'Uyqu = recovery'}))),
+  mk('fit-nutrition','Ovqatlanish Asoslari','fitness','🥗','21 kun.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Plate: 1/2 sabzavot, 1/4 protein (palm), 1/4 karbon (mushti)',tip:'Whole foods'}))),
+
+  // FINANCE (10)
+  mk('fin-budget','Byudjet 30 Kun','finance','💰','Pul oqimini boshqaring.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Bugungi har bir xarajatni yozing. Hafta oxiri kategoriyalashtiring.',tip:'Tracking = control'}))),
+  mk('fin-50-30-20','50/30/20 Qoidasi','finance','📊','7 kun.','beginner', days7(
+    ['Daromadni hisoblang','Majburiy 50%','Istakli 30%','Jamg\'arma 20%','Audit','Optimize','Avtomatlashtirish'],
+    ['Oylik daromadni yozing','Ijara, oziq-ovqat 50%','Hordiq, kiyim 30%','Jamg\'arma 20%','Oxirgi 30 kun audit','3 ta xarajatni kamaytiring','Avto-jamg\'arma sozlang'],
+    Array(7).fill('Pay yourself first'))),
+  mk('fin-emergency','Emergency Fund','finance','🆘','3 oy yashash uchun.','intermediate',
+    Array.from({length:90},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Daromadning 20% ni alohida hisobga.',tip:'Bu — uxlash uchun'}))),
+  mk('fin-invest','Investitsiya 101','finance','📈','21 kun.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Index fund, ETF, akslar — har kun 1 ta tushuncha.',tip:'Compound > picking'}))),
+  mk('fin-debt','Qarzdan Ozodlik','finance','⛓️','60 kun.','intermediate',
+    Array.from({length:60},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Snowball: kichik qarzdan boshlab to\'lang.',tip:'Momentum'}))),
+  mk('fin-side','Side Hustle 30 Kun','finance','🛠️','Qo\'shimcha daromad.','intermediate',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:i<7?'Idea validate':i<14?'MVP':i<21?'Sotish':'Skalalash',tip:'Ship > perfect'}))),
+  mk('fin-millionaire','Millioner Yo\'li','finance','💎','90 kun foundation.','advanced',
+    Array.from({length:90},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Daromad oshirish + jamg\'arma + investitsiya — 3 ta vector.',tip:'Income > saving > investing'}))),
+  mk('fin-frugal','Tejamkor Yashash','finance','🍎','21 kun minimal.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Faqat zarurlarni sotib oling. Har bir xarajatdan oldin "kerakmi?" deb so\'rang.',tip:'Less = more'}))),
+  mk('fin-passive','Passiv Daromad','finance','🌊','30 kun o\'rganish.','intermediate',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Dividends, royalties, rent, content — har kun 1 strategiya.',tip:'Vaqt — eng katta resurs'}))),
+  mk('fin-tax','Soliq Optimizatsiya','finance','🧾','7 kun.','intermediate',
+    days7(['Asoslar','Hisob turi','Deductions','Investitsion soliq','Biznes','Moliyaviy yil','Plan'],
+    ['Davlatingiz soliq sistemasini o\'rganing','Qaysi hisob turi sizga mos','Qonuniy chegirmalar','Investitsiya soliqlari','Biznes ochish (agar)','Yillik plan','Buxgalter bilan'],
+    Array(7).fill('Qonuniy minimallashtirish'))),
+
+  // PRODUCTIVITY (10)
+  mk('prod-gtd','GTD Metodi','productivity','✅','David Allen.','intermediate', days7(
+    ['Capture','Clarify','Organize','Reflect','Engage','Weekly review','Iterate'],
+    ['Hammasini bitta inboxga yozing','Har birini: harakatmi? Yo\'qmi?','Loyiha, kontekst, kun bo\'yicha','Kunlik 5 daq','Bugungi 3 ta MIT','Yakshanba 30 daq','Sistemani yaxshilang'],
+    Array(7).fill('Brain — fikr uchun, xotira uchun emas'))),
+  mk('prod-eisenhower','Eisenhower Matritsa','productivity','📐','7 kun.','beginner', days7(
+    ['Mat tushunish','Vazifalarni saralash','Q1 minimumga','Q2 maksimumga','Q3 delegate','Q4 yo\'q','Audit'],
+    ['Muhim vs Shoshilinch','Hozirgi 20 vazifani 4 kvadrat','Q1 (urgent+important) — 20% gacha','Q2 (important not urgent) — 60%','Q3 — boshqaga bering','Q4 — o\'chiring','Hafta audit'],
+    Array(7).fill('Important > urgent'))),
+  mk('prod-timeblock','Time Blocking','productivity','📅','14 kun.','intermediate',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Kunni 90 daq bloklarga bo\'ling. Har blok — 1 vazifa.',tip:'Calendar > to-do'}))),
+  mk('prod-mit','MIT Method','productivity','🎯','21 kun.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Ertalab 3 ta Most Important Task yozing va birinchi qiling.',tip:'Frog first'}))),
+  mk('prod-noemail','Email Detoks','productivity','📧','7 kun.','beginner', days7(
+    ['Audit','Unsub','Filters','2x kun','Inbox zero','Templates','Boundaries'],
+    ['Inboxni hisoblang','20 ta unsub','Filterlar yarating','Faqat 11:00 va 16:00 da tekshiring','Inbox zero','5 ta template','Email = work, not life'],
+    Array(7).fill('Email — boshqalar prioriteti'))),
+  mk('prod-2min','2 Daqiqa Qoidasi','productivity','⏱️','7 kun.','beginner', days7(
+    ['Tushunish','Test','Habit','Combine','Stack','Identity','Master'],
+    ['2 daqiqadan kam — bugun bajaring','10 marta sinab ko\'ring','Yangi odat — 2 daq versiyada','Push-up + ovqatlanish','Habit stack qiling','"Men paydo bo\'luvchi odamman"','Master'],
+    Array(7).fill('Boshlash — eng qiyin'))),
+  mk('prod-systems','Sistemalar > Maqsadlar','productivity','⚙️','14 kun.','intermediate',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Maqsad emas — sistema yarating. Har sohada 1 ta sistema.',tip:'Identity > goals > systems > tactics'}))),
+  mk('prod-singletask','Bir Vazifa','productivity','1️⃣','21 kun.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Faqat 1 vazifa, telefonni boshqa xona.',tip:'Multitask = past sifat'}))),
+  mk('prod-energy','Energiya Boshqaruvi','productivity','⚡','14 kun.','intermediate',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Kun bo\'yi energiyangizni 1-10 baholang. Pattern toping.',tip:'Vaqt emas — energiya'}))),
+  mk('prod-batch','Batch Processing','productivity','📦','7 kun.','intermediate', days7(
+    ['Audit','Email batch','Meeting batch','Content batch','Errand batch','Decision batch','Optimize'],
+    ['Vazifalarni guruhlash','Email — 2 marta/kun','Meetings — 1 kun','Content — 1 ta o\'tirishda hammasi','Errandlar — 1 marta','Kiyim/ovqat — oldindan','Audit'],
+    Array(7).fill('Context switching — qotil'))),
+
+  // RELATIONSHIPS (8)
+  mk('rel-comm','Muloqot Asoslari','relationships','💬','21 kun.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'1 ta open question bering. Aktiv tinglang.',tip:'Tinglash > gaplashish'}))),
+  mk('rel-charisma','Xarizma','relationships','✨','30 kun.','intermediate',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Hozirlik + iliqlik + kuch — 3 element.',tip:'Diqqat — eng katta sovg\'a'}))),
+  mk('rel-network','Tarmoq Qurish','relationships','🕸️','60 kun.','intermediate',
+    Array.from({length:60},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Hafta — 3 ta yangi tanish + 3 ta eski reconnect.',tip:'Give first'}))),
+  mk('rel-bound','Chegaralar','relationships','🚧','14 kun.','intermediate',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'1 ta "yo\'q" ayting. Sababini tushuntirmasdan.',tip:'No = full sentence'}))),
+  mk('rel-toxic','Toksik Odamlardan','relationships','☠️','21 kun.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Energiyangizni so\'ruvchilarni aniqlang. Kontaktni kamaytiring.',tip:'5 ta yaqin = sen'}))),
+  mk('rel-deep','Chuqur Do\'stlik','relationships','🤝','30 kun.','intermediate',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'1 ta do\'stga vulnerable savol. Buni qaytaring.',tip:'Chuqurlik > kenglik'}))),
+  mk('rel-conflict','Mojaroni Hal Qilish','relationships','⚖️','7 kun.','intermediate', days7(
+    ['Tushunish','I-statement','Aktiv tinglash','Empatiya','Compromise','Re-frame','Practice'],
+    ['Mojaro — fikr to\'qnashuvi','"Sen..." emas "Men..."','Qaytaring: "Sen aytayotgan..."','Ulardan tomondan ko\'ring','Win-win izlang','Mojaroni o\'sish deb qarang','1 ta real mojaroda qo\'llang'],
+    Array(7).fill('Maqsad: yutish emas, hal qilish'))),
+  mk('rel-family','Oila Aloqalari','relationships','👨‍👩‍👧','30 kun.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Oila a\'zosiga 1 ta minnatdorlik aytdi.',tip:'Vaqt — sevgi'}))),
+
+  // LEARNING (8)
+  mk('learn-feynman','Feynman Texnikasi','learning','🔬','7 kun.','intermediate', days7(
+    ['Tanlash','Tushuntirish','Bo\'shliqlar','Soddalashtirish','Re-teach','Master','Apply'],
+    ['1 ta tushuncha tanlang','Bolaga tushuntirgandek yozing','Qayerda chalkashganingizni toping','Texnik so\'zlarsiz qaytadan','Birovga aytib bering','Yana 1 daraja chuqur','Real hayotda qo\'llang'],
+    Array(7).fill('Tushuntira olmasang — bilmaysan'))),
+  mk('learn-speedread','Tez O\'qish','learning','📖','21 kun.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Pointer + 2x speed + sub-vocalization yo\'q.',tip:'Sifat > tezlik'}))),
+  mk('learn-memory','Xotira Mashqlari','learning','🧠','30 kun.','intermediate',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Memory palace + spaced repetition + mnemonics.',tip:'Birinchi marta — 24 soat ichida qaytar'}))),
+  mk('learn-language','Yangi Til 90 Kun','learning','🗣️','Spaced repetition.','intermediate',
+    Array.from({length:90},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'30 daq Anki + 15 daq podcast + 15 daq gaplashish (AI bilan).',tip:'Comprehensible input'}))),
+  mk('learn-skill','Skill Stack','learning','🧩','100 kun.','advanced',
+    Array.from({length:100},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Deliberate practice — 1 ta skill, 1 ta kichik element.',tip:'10000 soat — afsona, 20 soat — boshlash'}))),
+  mk('learn-read12','12 Kitob/Yil','learning','📚','30 kun habit.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'30 daq o\'qish + 5 daq yozib olish.',tip:'O\'qish — kapitalizatsiya'}))),
+  mk('learn-meta','Meta-Learning','learning','🎓','14 kun.','advanced',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Qanday o\'rganishni o\'rganing.',tip:'Process > content'}))),
+  mk('learn-ai','AI bilan O\'rganish','learning','🤖','21 kun.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Kunlik 1 ta murakkab mavzuni AI bilan tushuning.',tip:'Question > answer'}))),
+
+  // SPIRITUALITY (5)
+  mk('spi-mindful','Mindfulness 30','spirituality','🪷','Hozirgi onga.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'10 daq sokin o\'tirish + ovqat paytida 100% diqqat.',tip:'Sevish — diqqat'}))),
+  mk('spi-faith','Iymon 21','spirituality','🕌','Ruhiy mashqlar.','beginner',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Kundalik ibodat/meditatsiya + 1 ta yaxshilik.',tip:'Niyat — amaldan oldin'}))),
+  mk('spi-purpose','Hayot Maqsadi','spirituality','🧭','30 kun.','intermediate',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Ikigai 4 doirasi: sevgan, mahorat, dunyo kerak, pul beradigan.',tip:'Maqsad — qidirilmaydi, quriladi'}))),
+  mk('spi-letgo','Qo\'yib Yuborish','spirituality','🍃','14 kun.','intermediate',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'1 ta narsa, fikr yoki munosabatni qo\'yib yuboring.',tip:'Qarama-qarshilik — azobning manbai'}))),
+  mk('spi-presence','Hozirlik','spirituality','⏳','21 kun.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Soatda 1 marta to\'xtang. 5 nafas. "Hozirdaman."',tip:'Faqat hozir mavjud'}))),
+
+  // LEADERSHIP (5)
+  mk('lead-extreme','Extreme Ownership','leadership','👑','21 kun.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Har xato — sen javobgar. Aybsiz topma.',tip:'Ownership = power'}))),
+  mk('lead-vision','Vizyon Yaratish','leadership','🎯','14 kun.','intermediate',
+    Array.from({length:14},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'5 yillik vizyon + qadamlar.',tip:'Vizyon — magnit'}))),
+  mk('lead-team','Jamoa Qurish','leadership','👥','30 kun.','advanced',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'1-1 meetings, fikr-mulohaza, motivatsiya.',tip:'People > strategy'}))),
+  mk('lead-decide','Qaror Qabul Qilish','leadership','🧭','7 kun.','intermediate', days7(
+    ['Frame','Options','Criteria','Score','Decide','Commit','Review'],
+    ['Muammoni aniq yozing','3+ variant','Mezonlar','Har variantga ball','Eng yaxshini tanlang','Qaytmasdan ishga tushiring','30 kunda qayta ko\'ring'],
+    Array(7).fill('Yomon qaror > qarorsizlik'))),
+  mk('lead-public','Notiqlik','leadership','🎤','30 kun.','intermediate',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'Kunlik 5 daq video o\'zingizdan. Tahrir qilmang.',tip:'Reps > talent'}))),
+
+  // CREATIVITY (5)
+  mk('cre-write','Yozish Mahorati','creativity','✍️','30 kun.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'500 so\'z yozing — har qanday mavzu.',tip:'Bad first draft'}))),
+  mk('cre-art','Chizish 30','creativity','🎨','Daily.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'10 daq chizing — sketch, doodle.',tip:'Process > result'}))),
+  mk('cre-idea','Idea Generation','creativity','💡','21 kun.','intermediate',
+    Array.from({length:21},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'10 ta yangi g\'oya yozing. Yomonligi muhim emas.',tip:'Quantity > quality'}))),
+  mk('cre-music','Musiqa Yaratish','creativity','🎵','30 kun.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'15 daq instrument bilan + 1 ta loop yarating.',tip:'Play > learn'}))),
+  mk('cre-photo','Fotografiya 30','creativity','📷','Composition.','beginner',
+    Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'10 ta foto + bittasini tahlil qiling.',tip:'See > shoot'}))),
 ];
 
-export const courses: Record<string, CourseDetail> = {
-  'bb-beginner': {
-    id: 'bb-beginner', title: "Bodybuilding: Boshlang'ich", description: "Mushak o'stirishni noldan boshlang", duration: '8 hafta', difficulty: 'Oson', icon: '🏋️', category: 'sport',
-    weeklyPlan: [
-      { day: 1, title: "Ko'krak va Triceps", tasks: ["10 daqiqa isitish", "Bench press 3x12", "Dumbbell fly 3x15", "Tricep dips 3x10", "Cho'zish 5 daqiqa"], exercises: [
-        { name: 'Bench Press', sets: '3', reps: '12', notes: "Yengil vazndan boshlang" },
-        { name: 'Dumbbell Fly', sets: '3', reps: '15', notes: "Sekin bajaring" },
-        { name: 'Tricep Dips', sets: '3', reps: '10', notes: "To'liq amplituda" },
-      ]},
-      { day: 2, title: "Orqa va Biceps", tasks: ["Pull-ups 3x8", "Barbell row 3x12", "Bicep curl 3x15", "5 daqiqa cho'zish"] },
-      { day: 3, title: "Dam olish", tasks: ["Yengil yurish 30 daqiqa", "Cho'zish 15 daqiqa", "Ko'p suv ichish"] },
-      { day: 4, title: "Oyoq va Yelka", tasks: ["Squat 3x12", "Leg press 3x15", "Shoulder press 3x12", "Lateral raise 3x15"] },
-      { day: 5, title: "To'liq tana", tasks: ["Deadlift 3x8", "Push-ups 3x20", "Plank 3x1 daqiqa"] },
-      { day: 6, title: "Kardio", tasks: ["30 daqiqa yugurish", "10 daqiqa cho'zish"] },
-      { day: 7, title: "Dam olish", tasks: ["To'liq dam olish", "Toza ovqat", "8 soat uyqu"] },
-    ],
-    tips: ["Vaznni asta-sekin oshiring", "Har mashqda to'g'ri texnikaga e'tibor bering", "Proteinli ovqat kuniga 1.6-2g/kg tana vazniga", "8 soat uyqu — mushak dam olishda o'sadi"],
-    commonMistakes: ["Juda og'ir vazn olish", "Isitishni o'tkazib yuborish", "Dam olish kunlarini e'tiborsiz qoldirish"],
-  },
-  'bb-intermediate': {
-    id: 'bb-intermediate', title: "Bodybuilding: O'rta daraja", description: "Mushak massasini jiddiy oshiring", duration: '12 hafta', difficulty: "O'rta", icon: '💪', category: 'sport',
-    weeklyPlan: [
-      { day: 1, title: "Push Day", tasks: ["Bench press 4x8", "Incline dumbbell 4x10", "OHP 3x10", "Cable fly 3x15", "Tricep pushdown 4x12"] },
-      { day: 2, title: "Pull Day", tasks: ["Deadlift 4x6", "Barbell row 4x8", "Pull-ups 4x10", "Face pulls 3x15", "Bicep curl 4x12"] },
-      { day: 3, title: "Legs", tasks: ["Squat 4x8", "Romanian DL 3x10", "Leg press 4x12", "Calf raise 4x15", "Leg curl 3x12"] },
-      { day: 4, title: "Dam olish + Kardio", tasks: ["LISS kardio 40 daqiqa", "Cho'zish 20 daqiqa"] },
-      { day: 5, title: "Push Day 2", tasks: ["OHP 4x8", "Dumbbell press 4x10", "Lateral raise 4x15", "Dips 3x12"] },
-      { day: 6, title: "Pull Day 2", tasks: ["Weighted pull-ups 4x6", "Cable row 4x10", "Hammer curl 3x12", "Shrugs 3x15"] },
-      { day: 7, title: "Dam olish", tasks: ["To'liq tiklash", "Stretching", "Meal prep"] },
-    ],
-    tips: ["Progressive overload — har hafta biroz ko'proq", "Trening jurnali yuring", "Kaloriya surplus: +300-500 kcal"],
-    commonMistakes: ["Ego lifting", "Oyoq kunini o'tkazish", "Kam uxlash"],
-  },
-  'cal-beginner': {
-    id: 'cal-beginner', title: "Calisthenics: Asoslar", description: "O'z tana og'irligi bilan kuchli bo'ling", duration: '6 hafta', difficulty: 'Oson', icon: '🤸', category: 'sport',
-    weeklyPlan: [
-      { day: 1, title: "Push mashqlari", tasks: ["Push-ups 4x15", "Diamond push-ups 3x10", "Pike push-ups 3x8", "Plank 3x45s"] },
-      { day: 2, title: "Pull mashqlari", tasks: ["Pull-ups 3x5 (yordam bilan)", "Inverted rows 3x12", "Dead hang 3x30s"] },
-      { day: 3, title: "Oyoq", tasks: ["Squat 4x20", "Lunge 3x12 har oyoq", "Calf raise 3x20", "Wall sit 3x30s"] },
-      { day: 4, title: "Dam olish", tasks: ["Yurish 30 daqiqa", "Cho'zish"] },
-      { day: 5, title: "To'liq tana", tasks: ["Burpees 3x10", "Mountain climbers 3x20", "Push-ups 3x15", "Pull-ups 3x5"] },
-      { day: 6, title: "Skill work", tasks: ["Handstand amaliyot 15 daqiqa", "L-sit progressiya 10 daqiqa"] },
-      { day: 7, title: "Dam olish", tasks: ["Yoga/cho'zish"] },
-    ],
-    tips: ["Har harakatda to'liq amplituda", "Sekin-sekin qiyinlashtiring", "Skill work muntazam"],
-    commonMistakes: ["Texnikani buzish", "Juda tez qiyinlashtirish"],
-  },
-  'run-5k': {
-    id: 'run-5k', title: "5K Yugurish rejasi", description: "8 haftada 5 km yuguring", duration: '8 hafta', difficulty: 'Oson', icon: '🏃', category: 'sport',
-    weeklyPlan: [
-      { day: 1, title: "Yugurish/yurish", tasks: ["1 min yugurish + 2 min yurish × 8"] },
-      { day: 2, title: "Dam olish", tasks: ["Cho'zish 15 min"] },
-      { day: 3, title: "Yugurish", tasks: ["2 min yugurish + 1 min yurish × 8"] },
-      { day: 4, title: "Cross-training", tasks: ["Velosiped 30 min yoki suzish"] },
-      { day: 5, title: "Yugurish", tasks: ["3 min yugurish + 1 min yurish × 6"] },
-      { day: 6, title: "Dam olish", tasks: ["Faol dam olish"] },
-      { day: 7, title: "Uzoq yugurish", tasks: ["20 daqiqa uzluksiz, tezlikni o'zingiz tanlang"] },
-    ],
-    tips: ["Sekin boshlang", "To'g'ri poyafzal tanlang", "Suv rejimiga amal qiling"],
-    commonMistakes: ["Juda tez boshlash", "Dam olishni e'tiborsiz qoldirish"],
-  },
-  'mma-basics': {
-    id: 'mma-basics', title: "MMA asoslari", description: "Jang san'atlari bilan tanishing", duration: '8 hafta', difficulty: "O'rta", icon: '🥊', category: 'sport',
-    weeklyPlan: [
-      { day: 1, title: "Boks asoslari", tasks: ["Jab-cross 3x3 min", "Hook texnikasi 3x2 min", "Footwork drill 10 min", "Jump rope 3x3 min"] },
-      { day: 2, title: "Kuch mashqlari", tasks: ["Push-ups 4x20", "Pull-ups 3x10", "Squat 4x15", "Plank 3x1 min"] },
-      { day: 3, title: "Muay Thai", tasks: ["Tepa texnikasi", "Elbow strike", "Clinch work", "Bag work 5x3 min"] },
-      { day: 4, title: "Dam olish", tasks: ["Cho'zish", "Mobility work"] },
-      { day: 5, title: "Wrestling", tasks: ["Takedown drills", "Scramble work", "Guard passing"] },
-      { day: 6, title: "Kardio", tasks: ["Sparring/mitt work 30 min", "Conditioning"] },
-      { day: 7, title: "Dam olish", tasks: ["Recovery"] },
-    ],
-    tips: ["Texnika > kuch", "Sparringda nazorat", "Flexibility muhim"],
-    commonMistakes: ["Faqat kuchga ishonish", "Cardioni e'tiborsiz qoldirish"],
-  },
-  'wl-program': {
-    id: 'wl-program', title: "Vazn tashlash: 12 hafta", description: "Sog'lom usulda ortiqcha vazndan xalos bo'ling", duration: '12 hafta', difficulty: "O'rta", icon: '🔥', category: 'sport',
-    weeklyPlan: [
-      { day: 1, title: "HIIT + Kuch", tasks: ["HIIT 20 min", "Full body strength 30 min"] },
-      { day: 2, title: "Kardio", tasks: ["45 daqiqa tez yurish yoki yugurish"] },
-      { day: 3, title: "Kuch mashqlari", tasks: ["Upper body 40 min"] },
-      { day: 4, title: "Faol dam olish", tasks: ["Yoga 30 min", "Yurish"] },
-      { day: 5, title: "HIIT", tasks: ["Tabata 4x4 min", "Core 15 min"] },
-      { day: 6, title: "Kuch + Kardio", tasks: ["Lower body 30 min", "Treadmill 20 min"] },
-      { day: 7, title: "Dam olish", tasks: ["Meal prep", "Recovery"] },
-    ],
-    tips: ["Kaloriya defitsiti: -500 kcal/kun", "Protein yuqori saqlang", "Suv: 3+ litr", "Uyqu: 7-9 soat"],
-    commonMistakes: ["Juda kam yeyish", "Faqat kardio qilish", "Sabrsizlik"],
-  },
-  'wg-program': {
-    id: 'wg-program', title: "Vazn olish dasturi", description: "Mushak massasini sog'lom oshiring", duration: '12 hafta', difficulty: "O'rta", icon: '📈', category: 'sport',
-    weeklyPlan: [
-      { day: 1, title: "Ko'krak + Triceps", tasks: ["Bench press 4x8-10", "Incline DB press 3x12", "Cable fly 3x15", "Tricep pushdown 4x12"] },
-      { day: 2, title: "Orqa + Biceps", tasks: ["Deadlift 4x6", "Lat pulldown 4x10", "Barbell row 3x10", "Bicep curl 4x12"] },
-      { day: 3, title: "Dam olish", tasks: ["Yuqori kaloriyali ovqat tayyorlash", "Light stretching"] },
-      { day: 4, title: "Oyoq", tasks: ["Squat 4x8", "Leg press 4x12", "Romanian DL 3x10", "Calf raise 4x15"] },
-      { day: 5, title: "Yelka + Qo'l", tasks: ["OHP 4x8", "Lateral raise 4x15", "Hammer curl 3x12", "Close grip bench 3x10"] },
-      { day: 6, title: "Dam olish yoki yengil kardio", tasks: ["20 min yurish"] },
-      { day: 7, title: "Dam olish", tasks: ["Tiklash kunni"] },
-    ],
-    tips: ["Kaloriya surplus: +300-500 kcal", "Har 2 soatda ovqatlaning", "Creatine 5g/kun", "Progressive overload"],
-    commonMistakes: ["Kam yeyish", "Junk food bilan vazn olish", "Dam olmaslik"],
-  },
-  'fin-budget': {
-    id: 'fin-budget', title: "Budjet boshqarish", description: "Pulingizni nazorat qiling", duration: '4 hafta', difficulty: 'Oson', icon: '📊', category: 'finance',
-    weeklyPlan: [
-      { day: 1, title: "Hozirgi holatni baholash", tasks: ["Barcha daromadlarni yozing", "Barcha xarajatlarni yozing", "Sof balansni hisoblang"] },
-      { day: 2, title: "50/30/20 qoidasi", tasks: ["50% zaruriy xarajatlar", "30% istaklar", "20% tejash/investitsiya", "Kategoriyalarga bo'ling"] },
-      { day: 3, title: "Xarajatlarni kuzatish", tasks: ["Har bir xarajatni yozing", "Haftada bir marta tekshiruv", "Keraksiz xarajatlarni aniqlang"] },
-      { day: 4, title: "Favqulodda fond", tasks: ["3-6 oylik xarajatlar miqdorini hisoblang", "Avtomatik o'tkazma o'rnating", "Sarflamaslik qoidalari"] },
-      { day: 5, title: "Qarz boshqarish", tasks: ["Barcha qarzlarni ro'yxatlang", "Snowball yoki Avalanche usuli", "Qarzni kamaytirish rejasi"] },
-      { day: 6, title: "Tahlil", tasks: ["Haftalik xarajatlar tahlili", "Tejash imkoniyatlarini toping"] },
-      { day: 7, title: "Reja yangilash", tasks: ["Keyingi hafta uchun budjet tuzish"] },
-    ],
-    tips: ["Har kuni xarajat yozing", "Naqd pul ishlatishga o'ting", "Kichik maqsadlardan boshlang"],
-    commonMistakes: ["Budjetni yozmaslik", "Juda qattiq cheklov", "Favqulodda fondni yaratmaslik"],
-  },
-  'fin-invest': {
-    id: 'fin-invest', title: "Investitsiya asoslari", description: "Pulingizni ishlating", duration: '6 hafta', difficulty: "O'rta", icon: '📈', category: 'finance',
-    weeklyPlan: [
-      { day: 1, title: "Investitsiya turlari", tasks: ["Aksiyalar", "Obligatsiyalar", "ETF/Index fondlar", "Ko'chmas mulk", "Kripto asoslari"] },
-      { day: 2, title: "Risk boshqarish", tasks: ["Diversifikatsiya", "Risk tolerantligi aniqlash", "Dollar-cost averaging"] },
-      { day: 3, title: "Brokerage ochish", tasks: ["Platformani tanlash", "Demo hisob ochish", "Asosiy orderlarni o'rganish"] },
-      { day: 4, title: "ETF portfel", tasks: ["3-fond portfel strategiyasi", "Xarajat koeffitsientini tekshirish"] },
-      { day: 5, title: "Fundamental tahlil", tasks: ["P/E, P/B ratio", "Daromad hisobotini o'qish"] },
-      { day: 6, title: "Amaliyot", tasks: ["Demo hisobda savdo"] },
-      { day: 7, title: "Tahlil", tasks: ["Haftalik natijalar tahlili"] },
-    ],
-    tips: ["Uzoq muddatli fikrlang", "Hissiyotga berilmang", "Tushunadigan narsaga investitsiya qiling"],
-    commonMistakes: ["FOMO bilan xarid", "Diversifikatsiya qilmaslik", "Qisqa muddatli fikrlash"],
-  },
-  'fin-hustle': {
-    id: 'fin-hustle', title: "Qo'shimcha daromad", description: "Yangi daromad manbalari yarating", duration: '8 hafta', difficulty: "O'rta", icon: '💵', category: 'finance',
-    weeklyPlan: [
-      { day: 1, title: "Ko'nikmalaringiz auditi", tasks: ["Nima qila olishingizni ro'yxatlang", "Bozorda talab borlarini aniqlang"] },
-      { day: 2, title: "Freelancing", tasks: ["Upwork/Fiverr profil yarating", "Portfolio tayyorlang", "3 ta loyihaga ariza bering"] },
-      { day: 3, title: "Online savdo", tasks: ["Mahsulot tanlash", "Platforma tanlash"] },
-      { day: 4, title: "Kontent yaratish", tasks: ["YouTube/Blog boshlash", "Niche tanlash", "Reja tuzish"] },
-      { day: 5, title: "Mijozlar topish", tasks: ["Tarmoqlash", "Sovuq xatlar yozish"] },
-      { day: 6, title: "Avtomatlashtirish", tasks: ["Takroriy jarayonlarni toping", "Vaqtni tejang"] },
-      { day: 7, title: "Tahlil va reja", tasks: ["Haftalik daromad tahlili", "Keyingi qadam"] },
-    ],
-    tips: ["Bittasiga konsentratsiya qiling", "Sifatli ish", "Sabr bilan davom eting"],
-    commonMistakes: ["Ko'p narsani birvarakayiga boshlash", "Past narx qo'yish", "Marketing qilmaslik"],
-  },
-  'med-start': {
-    id: 'med-start', title: "Meditatsiya boshlash", description: "Ichki tinchlik va diqqat", duration: '4 hafta', difficulty: 'Oson', icon: '🧘', category: 'mental',
-    weeklyPlan: [
-      { day: 1, title: "Nafas olish", tasks: ["5 daqiqa nafas meditatsiyasi", "4-7-8 texnikasi", "Tinch joyda o'tiring"] },
-      { day: 2, title: "Body scan", tasks: ["10 daqiqa body scan", "Oyoqdan boshga diqqat"] },
-      { day: 3, title: "Mindfulness", tasks: ["Ovqatlanishda mindfulness", "5 daqiqa hozirgi lahzaga diqqat"] },
-      { day: 4, title: "Ertalab meditatsiya", tasks: ["Uyg'ongandan so'ng 10 daqiqa", "Kun maqsadlarini o'ylash"] },
-      { day: 5, title: "Minnatdorlik", tasks: ["3 ta minnatdorlik yozing", "5 daqiqa minnatdorlik meditatsiyasi"] },
-      { day: 6, title: "Yurish meditatsiyasi", tasks: ["15 daqiqa ongni haydash", "Tabiatda yurish"] },
-      { day: 7, title: "Dam olish", tasks: ["Erkin shakl", "O'zingizga ma'qul usulni tanlang"] },
-    ],
-    tips: ["Har kuni bir xil vaqtda", "Kutmang, kuzating", "Sabr qiling"],
-    commonMistakes: ["'Noto'g'ri qilyapman' deb o'ylash", "Juda uzoq boshlash", "Muntazam emaslik"],
-  },
-  'stress-mgmt': {
-    id: 'stress-mgmt', title: "Stress boshqarish", description: "Stressni nazorat qiling", duration: '4 hafta', difficulty: 'Oson', icon: '🌊', category: 'mental',
-    weeklyPlan: [
-      { day: 1, title: "Stress audit", tasks: ["Stress manbalarini yozing", "Tana reaksiyalarini kuzating"] },
-      { day: 2, title: "Nafas texnikalari", tasks: ["Box breathing: 4-4-4-4", "Parasimpatik aktivatsiya"] },
-      { day: 3, title: "Jismoniy chiqarish", tasks: ["Sport 30 min", "Cold shower 2 min"] },
-      { day: 4, title: "Vaqt boshqarish", tasks: ["Priority matrix", "Yo'q deyishni o'rganing"] },
-      { day: 5, title: "Ijtimoiy qo'llab-quvvatlash", tasks: ["Ishonchli odamga gaplashing", "Yolg'iz vaqt ham ajrating"] },
-      { day: 6, title: "Uyqu gigiena", tasks: ["Ekran vaqtini kamaytiring", "Uyqu tartibi o'rnating"] },
-      { day: 7, title: "Haftalik tahlil", tasks: ["Stress darajasini baholang", "Eng samarali usulni aniqlang"] },
-    ],
-    tips: ["Stressni to'liq yo'q qilish mumkin emas — boshqarishni o'rganing", "Muntazamlik muhim"],
-    commonMistakes: ["Stressni inkor qilish", "Faqat bitta usulga tayanish"],
-  },
-  'journal-start': {
-    id: 'journal-start', title: "Jurnal yozish", description: "Fikrlarni tartibga soling", duration: '3 hafta', difficulty: 'Oson', icon: '📝', category: 'mental',
-    weeklyPlan: [
-      { day: 1, title: "Ertalabki sahifalar", tasks: ["3 sahifa erkin yozing", "Hech narsani filtrlamang"] },
-      { day: 2, title: "Minnatdorlik jurnali", tasks: ["3 ta minnatdorlik", "1 ta bugun uchun maqsad"] },
-      { day: 3, title: "Refleksiya", tasks: ["Kecha nimani yaxshi qildim?", "Nimani o'zgartirishim kerak?"] },
-      { day: 4, title: "Maqsad jurnali", tasks: ["1-3-5 yillik maqsadlar", "Bugungi qadamlar"] },
-      { day: 5, title: "Hissiyot jurnali", tasks: ["Bugungi kayfiyat", "Nima sababchi?", "Qanday javob berdim?"] },
-      { day: 6, title: "Muammo yechish", tasks: ["Muammoni yozing", "5 ta yechim topingp", "Eng yaxshisini tanlang"] },
-      { day: 7, title: "Haftalik tahlil", tasks: ["Hafta xulosaslari", "Eng muhim darslar"] },
-    ],
-    tips: ["Har kuni bir xil vaqtda", "Grammatikani tashvishlamang", "Haqiqiy bo'ling"],
-    commonMistakes: ["Bir necha kun o'tkazib yuborish", "Faqat ijobiy narsalar yozish"],
-  },
-  'habit-build': {
-    id: 'habit-build', title: "Odat shakllantirish", description: "21-66 kun qoidasi bilan yangi odat yarating", duration: '9 hafta', difficulty: "O'rta", icon: '🔄', category: 'discipline',
-    weeklyPlan: [
-      { day: 1, title: "Maqsadni aniqlash", tasks: ["Qanday odat?", "Nima uchun?", "Qachon va qayerda?"] },
-      { day: 2, title: "Muhit dizayni", tasks: ["Trigger yarating", "Osonlashtiring", "Frictionni kamaytiring"] },
-      { day: 3, title: "2 daqiqa qoidasi", tasks: ["Odatni eng kichik versiyasini bajaring", "Faqat 2 daqiqa"] },
-      { day: 4, title: "Habit stacking", tasks: ["Mavjud odatga bog'lang", 'Formulа: "X qilgandan keyin Y qilaman"'] },
-      { day: 5, title: "Tracking", tasks: ["Kuningizni belgilang", "Streakni boshlang"] },
-      { day: 6, title: "Muvaffaqiyatsizlik rejasi", tasks: ["Agar bajarmasam nima?", "Zaxira reja"] },
-      { day: 7, title: "Tahlil", tasks: ["Hafta qanday o'tdi?", "Nimani o'zgartirish kerak?"] },
-    ],
-    tips: ["Kichikdan boshlang", "Hech qachon 2 kunni o'tkazib yubormang", "Muhitni boshqaring"],
-    commonMistakes: ["Juda ko'p odatni birvarakayiga boshlash", "Motivatsiyaga tayanish"],
-  },
-  'bad-habit-break': {
-    id: 'bad-habit-break', title: "Yomon odatlarni tashlash", description: "Trigger-Routine-Reward tizimini buzish", duration: '6 hafta', difficulty: 'Qiyin', icon: '🚫', category: 'discipline',
-    weeklyPlan: [
-      { day: 1, title: "Odatni aniqlash", tasks: ["Aniq yomon odatni yozing", "Qachon paydo bo'ladi?", "Nima trigger?"] },
-      { day: 2, title: "Trigger xaritasi", tasks: ["Har safar trigger bo'lganda yozing", "Vaqt, joy, kayfiyat, odamlar"] },
-      { day: 3, title: "Mukofot aniqlash", tasks: ["Bu odat sizga nima beradi?", "Haqiqiy ehtiyoj nima?"] },
-      { day: 4, title: "O'rnini bosuvchi", tasks: ["Sog'lom alternativa topang", "Huddi shunday mukofot beruvchi"] },
-      { day: 5, title: "Muhit o'zgartirish", tasks: ["Triggerlarni olib tashlang", "Yangi muhit yarating"] },
-      { day: 6, title: "Accountability", tasks: ["Birovga ayting", "Jazo/mukofot tizimi"] },
-      { day: 7, title: "Tahlil", tasks: ["Necha marta bajardingiz?", "Nima yordam berdi?"] },
-    ],
-    tips: ["Bitta odatga konsentratsiya", "Sabr — 66 kun kerak bo'lishi mumkin", "O'zingizni ayblashni to'xtating"],
-    commonMistakes: ["Bir kunda tashlashga urinish", "Triggerlarni e'tiborsiz qoldirish", "Yolg'iz kurashish"],
-  },
-  'morning-routine': {
-    id: 'morning-routine', title: "Ertalabki tartib", description: "Kunni g'alaba bilan boshlang", duration: '3 hafta', difficulty: 'Oson', icon: '🌅', category: 'discipline',
-    weeklyPlan: [
-      { day: 1, title: "5:30 uyg'onish", tasks: ["Snooze bosmasdan turish", "Suv ichish", "10 daqiqa cho'zish"] },
-      { day: 2, title: "Harakat", tasks: ["20 min mashq yoki yugurish", "Sovuq dush 2 min"] },
-      { day: 3, title: "Ong", tasks: ["5 min meditatsiya", "3 ta minnatdorlik yozish", "Kun maqsadlarini belgilash"] },
-      { day: 4, title: "Bilim", tasks: ["20 min kitob o'qish", "Muhim narsalarni yozish"] },
-      { day: 5, title: "Reja", tasks: ["Top 3 vazifa belgilash", "Kalendarni tekshirish", "Kechqurungi uyqu vaqtini belgilash"] },
-      { day: 6, title: "To'liq tartib", tasks: ["Hammasini birlashtiring", "Vaqtni o'lchang"] },
-      { day: 7, title: "Tahlil", tasks: ["Nima ishladi?", "Nimani o'zgartirish kerak?"] },
-    ],
-    tips: ["Kechqurun 10da uxlang", "Telefonni xonadan chiqaring", "Har kuni bir xil tartib"],
-    commonMistakes: ["Uyqu kamayishi", "Juda ko'p narsani qo'shish", "Dam olish kunlarida buzish"],
-  },
-  'read-habit': {
-    id: 'read-habit', title: "Kitob o'qish odati", description: "Kuniga 30 daqiqa o'qishni odat qiling", duration: '4 hafta', difficulty: 'Oson', icon: '📖', category: 'intellect',
-    weeklyPlan: [
-      { day: 1, title: "Kitob tanlash", tasks: ["Qiziqishingizga mos kitob", "Juda oson emas, juda qiyin emas"] },
-      { day: 2, title: "10 daqiqa", tasks: ["Faqat 10 daqiqa o'qing", "Vaqt va joyni belgilang"] },
-      { day: 3, title: "15 daqiqa", tasks: ["Vaqtni oshiring", "Eslatmalar yozing"] },
-      { day: 4, title: "20 daqiqa", tasks: ["Diqqatni saqlang", "Telefonni olib qo'ying"] },
-      { day: 5, title: "25 daqiqa", tasks: ["Active reading: savol bering", "Muhim joylarni belgilang"] },
-      { day: 6, title: "30 daqiqa", tasks: ["Maqsadga yetdingiz!", "Sifatli o'qing"] },
-      { day: 7, title: "Tahlil", tasks: ["Nima o'rgandingiz?", "Hayotga qanday qo'llay olasiz?"] },
-    ],
-    tips: ["Uxlashdan oldin o'qing", "Doim kitob olib yuring", "Yoqmagan kitobni tashlang"],
-    commonMistakes: ["Juda qiyin kitob tanlash", "Muntazam emaslik"],
-  },
-  'deep-work': {
-    id: 'deep-work', title: "Deep Work", description: "Chuqur konsentratsiya qobiliyatini oshiring", duration: '6 hafta', difficulty: "O'rta", icon: '🎯', category: 'intellect',
-    weeklyPlan: [
-      { day: 1, title: "25 min blok", tasks: ["Pomodoro: 25 min ish + 5 min dam", "Telefonni o'chiring", "Bir vazifaga konsentratsiya"] },
-      { day: 2, title: "Muhit tayyorlash", tasks: ["Quloqchin", "Shovqin yo'q", "Barcha notificationlarni o'chiring"] },
-      { day: 3, title: "45 min blok", tasks: ["Vaqtni oshiring", "Bir mavzuga chuqur kiring"] },
-      { day: 4, title: "Raqamli detox", tasks: ["2 soat telefonsiz", "Faqat bitta vazifa"] },
-      { day: 5, title: "60 min blok", tasks: ["1 soatlik uzluksiz ish", "Natijani yozing"] },
-      { day: 6, title: "90 min blok", tasks: ["Maqsad: 90 min deep work", "Eng muhim vazifada"] },
-      { day: 7, title: "Tahlil", tasks: ["Eng samarali qachon?", "Nima chalg'itdi?"] },
-    ],
-    tips: ["Ertalab deep work qiling", "Ritual yarating", "Natijani o'lchang"],
-    commonMistakes: ["Multitasking", "Notificationlarni o'chirmaslik"],
-  },
-  'learn-methods': {
-    id: 'learn-methods', title: "Samarali o'rganish", description: "Ilmiy asoslangan o'rganish usullari", duration: '4 hafta', difficulty: "O'rta", icon: '🧪', category: 'intellect',
-    weeklyPlan: [
-      { day: 1, title: "Spaced Repetition", tasks: ["Anki/flashcard yarating", "Interval: 1-3-7-14 kun"] },
-      { day: 2, title: "Active Recall", tasks: ["O'qigandan so'ng kitobni yoping", "Eslab qolganingizni yozing"] },
-      { day: 3, title: "Feynman texnikasi", tasks: ["Mavzuni 5 yoshli bolaga tushuntiring", "Tushunamaganingizni aniqlang"] },
-      { day: 4, title: "Pomodoro + Interleaving", tasks: ["25 min bloklarda", "Mavzularni almashtiring"] },
-      { day: 5, title: "Mind mapping", tasks: ["Mavzuni vizual xaritalang", "Bog'lanishlarni toping"] },
-      { day: 6, title: "O'rgatish orqali o'rganish", tasks: ["Birovga tushuntiring", "Savollarga javob bering"] },
-      { day: 7, title: "Tahlil", tasks: ["Qaysi usul eng samarali?", "Keyingi hafta rejasi"] },
-    ],
-    tips: ["Turli usullarni aralshtiring", "Uyquni e'tiborsiz qoldirmang", "Faol o'rganing, passiv emas"],
-    commonMistakes: ["Faqat qayta o'qish", "Highlighting = o'rganish deb o'ylash"],
-  },
-  'test-prep': {
-    id: 'test-prep', title: "SAT/IELTS tayyorgarlik", description: "Top universitetlarga kirish", duration: '12 hafta', difficulty: 'Qiyin', icon: '🎯', category: 'university',
-    weeklyPlan: [
-      { day: 1, title: "Diagnostika testi", tasks: ["Practice test yeching", "Zaif tomonlarni aniqlang"] },
-      { day: 2, title: "Matematika/Reading", tasks: ["2 soat amaliyot", "Xatolarni tahlil qiling"] },
-      { day: 3, title: "Writing/Listening", tasks: ["Essay yozing", "Feedback oling"] },
-      { day: 4, title: "Lug'at", tasks: ["20 ta yangi so'z", "Flashcard yarating"] },
-      { day: 5, title: "Practice test", tasks: ["Vaqtni hisoblab yeching", "Natijani yozing"] },
-      { day: 6, title: "Zaif tomonlar", tasks: ["Faqat zaif sohada ishlang"] },
-      { day: 7, title: "Dam olish + Tahlil", tasks: ["Haftalik progress", "Keyingi hafta reja"] },
-    ],
-    tips: ["Har kuni 2+ soat", "Xatolardan o'rganing", "Mock testlar muhim"],
-    commonMistakes: ["Faqat kuchli tomonlarni mashq qilish", "Vaqtni boshqarmaslik"],
-  },
-  'essay-writing': {
-    id: 'essay-writing', title: "Kuchli essay yozish", description: "Harvard darajasida ariza yozing", duration: '6 hafta', difficulty: 'Qiyin', icon: '✍️', category: 'university',
-    weeklyPlan: [
-      { day: 1, title: "Hikoyangizni toping", tasks: ["O'zingiz haqida 10 ta noyob narsa yozing", "Eng kuchli tajribangiz"] },
-      { day: 2, title: "Structure", tasks: ["Hook + Body + Conclusion", "Show, don't tell"] },
-      { day: 3, title: "Birinchi qoralama", tasks: ["To'xtovsiz yozing", "Tahrirlamang"] },
-      { day: 4, title: "Tahrir", tasks: ["Keraksiz so'zlarni olib tashlang", "Faol fe'l ishlating"] },
-      { day: 5, title: "Feedback", tasks: ["3 kishiga ko'rsating", "Fikrlarni yig'ing"] },
-      { day: 6, title: "Qayta yozish", tasks: ["Feedbackni qo'llang", "Yakuniy versiya"] },
-      { day: 7, title: "Tahlil", tasks: ["Boshqa muvaffaqiyatli essaylarni o'qing"] },
-    ],
-    tips: ["Haqiqiy bo'ling", "Aniq misol keltiring", "Oddiy til ishlating"],
-    commonMistakes: ["Umumiy yozish", "Ko'p mavzu aralshtirish", "Deadline oldidan boshlash"],
-  },
-};
+export const courseCategories = [
+  { id: 'all', label: 'Hammasi', emoji: '🌍' },
+  { id: 'discipline', label: 'Intizom', emoji: '🛡️' },
+  { id: 'mindset', label: 'Tafakkur', emoji: '🧠' },
+  { id: 'fitness', label: 'Fitness', emoji: '💪' },
+  { id: 'finance', label: 'Pul', emoji: '💰' },
+  { id: 'productivity', label: 'Samaradorlik', emoji: '⚡' },
+  { id: 'relationships', label: 'Munosabatlar', emoji: '💬' },
+  { id: 'learning', label: 'O\'rganish', emoji: '🎓' },
+  { id: 'spirituality', label: 'Ma\'naviyat', emoji: '🕊️' },
+  { id: 'leadership', label: 'Liderlik', emoji: '👑' },
+  { id: 'creativity', label: 'Ijodkorlik', emoji: '🎨' },
+];

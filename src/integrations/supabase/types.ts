@@ -38,6 +38,98 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name?: string | null
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
+      experiments: {
+        Row: {
+          after_score: number | null
+          before_score: number | null
+          description: string | null
+          duration_days: number
+          id: string
+          notes: string | null
+          started_at: string
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          after_score?: number | null
+          before_score?: number | null
+          description?: string | null
+          duration_days?: number
+          id?: string
+          notes?: string | null
+          started_at?: string
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          after_score?: number | null
+          before_score?: number | null
+          description?: string | null
+          duration_days?: number
+          id?: string
+          notes?: string | null
+          started_at?: string
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           addressee_id: string
@@ -130,6 +222,65 @@ export type Database = {
           streak?: number
           user_id?: string
           xp_reward?: number
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      micro_decisions: {
+        Row: {
+          answer: boolean
+          category: string | null
+          created_at: string
+          id: string
+          prompt: string
+          user_id: string
+        }
+        Insert: {
+          answer: boolean
+          category?: string | null
+          created_at?: string
+          id?: string
+          prompt: string
+          user_id: string
+        }
+        Update: {
+          answer?: boolean
+          category?: string | null
+          created_at?: string
+          id?: string
+          prompt?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -243,6 +394,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_identity: {
+        Row: {
+          identity: string
+          updated_at: string
+          user_id: string
+          votes: number
+        }
+        Insert: {
+          identity: string
+          updated_at?: string
+          user_id: string
+          votes?: number
+        }
+        Update: {
+          identity?: string
+          updated_at?: string
+          user_id?: string
+          votes?: number
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           created_at: string
@@ -284,7 +456,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_conv_participant: {
+        Args: { _conv: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
