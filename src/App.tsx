@@ -26,6 +26,13 @@ import MethodsPage from "./pages/MethodsPage";
 import CalmPage from "./pages/CalmPage";
 import CharactersPage from "./pages/CharactersPage";
 import DecisionHubPage from "./pages/DecisionHubPage";
+import CognitiveDrillsPage from "./pages/CognitiveDrillsPage";
+import IdentityPage from "./pages/IdentityPage";
+import LifeSimulationPage from "./pages/LifeSimulationPage";
+import CommandModePage from "./pages/CommandModePage";
+import ExperimentLabPage from "./pages/ExperimentLabPage";
+import FocusLockPage from "./pages/FocusLockPage";
+import ChatPage from "./pages/ChatPage";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +65,13 @@ const App = () => (
                 <Route path="/calm" element={<CalmPage />} />
                 <Route path="/characters" element={<CharactersPage />} />
                 <Route path="/decision-hub" element={<DecisionHubPage />} />
+                <Route path="/drills" element={<CognitiveDrillsPage />} />
+                <Route path="/identity" element={<IdentityPage />} />
+                <Route path="/simulation" element={<LifeSimulationPage />} />
+                <Route path="/command" element={<CommandModePage />} />
+                <Route path="/lab" element={<ExperimentLabPage />} />
+                <Route path="/focus" element={<FocusLockPage />} />
+                <Route path="/chat/:id" element={<ChatPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
