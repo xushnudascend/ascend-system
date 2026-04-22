@@ -8,7 +8,7 @@ import {
   DollarSign, Heart, GraduationCap, ChevronRight,
   Calculator, MessageCircle, BarChart3, Loader2,
 } from "lucide-react";
-import { categories } from "@/data/courses";
+import { courseCategories } from "@/data/courses";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -287,16 +287,15 @@ export default function DashboardPage() {
             <TrendingUp className="w-5 h-5 text-primary" /> Bo'limlar
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {categories.map((cat, i) => (
+            {courseCategories.filter(c => c.id !== 'all').map((cat, i) => (
               <motion.div key={cat.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.05 }}>
-                <Link to={`/courses?category=${cat.id}`}
+                <Link to={`/courses`}
                   className="block p-5 rounded-xl border border-border bg-card card-hover">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">{cat.icon}</span>
-                    {categoryIcons[cat.id]}
+                    <span className="text-2xl">{cat.emoji}</span>
                   </div>
-                  <h3 className="font-heading font-semibold text-sm">{cat.title}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{cat.subcategories.length} ta bo'lim</p>
+                  <h3 className="font-heading font-semibold text-sm">{cat.label}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Kurslar</p>
                 </Link>
               </motion.div>
             ))}
