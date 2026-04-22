@@ -1,98 +1,76 @@
 import { useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { categories, courses } from "@/data/courses";
-import { ArrowLeft, ChevronRight, Clock, BarChart, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowLeft, Clock, BarChart, CheckCircle2, Search } from "lucide-react";
+import TopBar from "@/components/TopBar";
+import DailyQuoteModal from "@/components/DailyQuoteModal";
+import { courses, courseCategories, type Course } from "@/data/courses";
 
 export default function CoursesPage() {
-  const [searchParams] = useSearchParams();
-  const categoryParam = searchParams.get('category');
-  const [selectedCategory, setSelectedCategory] = useState(categoryParam || '');
-  const [selectedSubCategory, setSelectedSubCategory] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState('');
+  const [cat, setCat] = useState("all");
+  const [q, setQ] = useState("");
+  const [active, setActive] = useState<Course | null>(null);
+  const [doneDays, setDoneDays] = useState<Record<string, number[]>>(() => {
+    try { return JSON.parse(localStorage.getItem("course-progress") || "{}"); } catch { return {}; }
+  });
 
-  const cat = categories.find(c => c.id === selectedCategory);
-  const subCat = cat?.subcategories.find(s => s.id === selectedSubCategory);
-  const course = selectedCourse ? courses[selectedCourse] : null;
+  function toggleDay(courseId: string, day: number) {
+    setDoneDays(prev => {
+      const cur = new Set(prev[courseId] || []);
+      cur.has(day) ? cur.delete(day) : cur.add(day);
+      const next = { ...prev, [courseId]: Array.from(cur) };
+      localStorage.setItem("course-progress", JSON.stringify(next));
+      return next;
+    });
+  }
 
-  if (course) {
+  const list = courses.filter(c => (cat === "all" || c.category === cat) && (!q || c.title.toLowerCase().includes(q.toLowerCase()) || c.description.toLowerCase().includes(q.toLowerCase())));
+
+  if (active) {
+    const done = doneDays[active.id] || [];
+    const pct = Math.round((done.length / active.lessons.length) * 100);
     return (
       <div className="min-h-screen bg-background">
-        <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3">
-          <button onClick={() => setSelectedCourse('')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+        <TopBar />
+        <div className="max-w-3xl mx-auto px-4 py-6">
+          <button onClick={() => setActive(null)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 text-sm">
             <ArrowLeft className="w-4 h-4" /> Orqaga
           </button>
-        </nav>
-        <div className="max-w-3xl mx-auto px-4 py-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl">{course.icon}</span>
+              <span className="text-4xl">{active.emoji}</span>
               <div>
-                <h1 className="font-heading text-2xl font-bold">{course.title}</h1>
-                <p className="text-muted-foreground text-sm">{course.description}</p>
+                <h1 className="font-heading text-2xl font-bold">{active.title}</h1>
+                <p className="text-muted-foreground text-sm">{active.description}</p>
               </div>
             </div>
-            <div className="flex gap-4 mt-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {course.duration}</span>
-              <span className="flex items-center gap-1"><BarChart className="w-4 h-4" /> {course.difficulty}</span>
+            <div className="flex gap-3 mt-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {active.duration} kun</span>
+              <span className="flex items-center gap-1"><BarChart className="w-3 h-3" /> {active.level}</span>
+              <span className="text-primary">{pct}% bajarildi</span>
             </div>
-
-            {/* Tips */}
-            <div className="mt-8 p-5 rounded-xl border border-success/20 bg-success/5">
-              <h3 className="font-heading font-semibold text-success mb-3">💡 Muhim maslahatlar</h3>
-              <ul className="space-y-2">
-                {course.tips.map((t, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+              <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} className="h-full bg-primary" />
             </div>
-
-            {/* Common Mistakes */}
-            <div className="mt-4 p-5 rounded-xl border border-destructive/20 bg-destructive/5">
-              <h3 className="font-heading font-semibold text-destructive mb-3">⚠️ Ko'p uchraydigan xatolar</h3>
-              <ul className="space-y-2">
-                {course.commonMistakes.map((m, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <span className="text-destructive shrink-0">✗</span>
-                    <span>{m}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Weekly Plan */}
-            <h3 className="font-heading text-xl font-bold mt-8 mb-4">Haftalik reja</h3>
-            <div className="space-y-3">
-              {course.weeklyPlan.map((day) => (
-                <div key={day.day} className="p-4 rounded-xl border border-border bg-card">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-heading text-sm font-bold">{day.day}</span>
-                    <h4 className="font-heading font-semibold">{day.title}</h4>
-                  </div>
-                  <ul className="space-y-1 ml-10">
-                    {day.tasks.map((task, i) => (
-                      <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                        <span className="text-primary shrink-0">•</span> {task}
-                      </li>
-                    ))}
-                  </ul>
-                  {day.exercises && (
-                    <div className="mt-3 ml-10">
-                      <p className="text-xs text-primary font-medium mb-1">Mashqlar:</p>
-                      {day.exercises.map((ex, i) => (
-                        <div key={i} className="text-xs text-muted-foreground flex gap-2">
-                          <span className="font-medium text-foreground">{ex.name}</span>
-                          {ex.sets && <span>{ex.sets}×{ex.reps}</span>}
-                          {ex.notes && <span className="text-primary/70">— {ex.notes}</span>}
+            <div className="mt-6 space-y-2">
+              {active.lessons.map(l => {
+                const isDone = done.includes(l.day);
+                return (
+                  <motion.div key={l.day} whileHover={{ x: 2 }} className={`p-4 rounded-xl border ${isDone ? "bg-success/5 border-success/30" : "bg-card border-border"}`}>
+                    <button onClick={() => toggleDay(active.id, l.day)} className="w-full text-left flex items-start gap-3">
+                      <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${isDone ? "bg-success border-success" : "border-muted-foreground"}`}>
+                        {isDone && <CheckCircle2 className="w-3 h-3 text-background" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="font-semibold text-sm">Kun {l.day}: {l.title}</div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                        <p className="text-xs text-muted-foreground mt-1">{l.task}</p>
+                        <p className="text-[10px] text-primary mt-1">💡 {l.tip}</p>
+                      </div>
+                    </button>
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         </div>
@@ -100,102 +78,55 @@ export default function CoursesPage() {
     );
   }
 
-  if (subCat) {
-    return (
-      <div className="min-h-screen bg-background">
-        <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3">
-          <button onClick={() => setSelectedSubCategory('')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-4 h-4" /> {cat?.title}
-          </button>
-        </nav>
-        <div className="max-w-3xl mx-auto px-4 py-6">
-          <h1 className="font-heading text-2xl font-bold mb-2">{subCat.title}</h1>
-          <p className="text-muted-foreground mb-6">{subCat.description}</p>
-          <div className="space-y-3">
-            {subCat.courseIds.map(cid => {
-              const c = courses[cid];
-              if (!c) return null;
-              return (
-                <motion.button key={cid} onClick={() => setSelectedCourse(cid)} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="w-full p-5 rounded-xl border border-border bg-card card-hover text-left flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{c.icon}</span>
-                    <div>
-                      <h3 className="font-heading font-semibold">{c.title}</h3>
-                      <p className="text-sm text-muted-foreground">{c.duration} • {c.difficulty}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                </motion.button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (cat) {
-    return (
-      <div className="min-h-screen bg-background">
-        <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3">
-          <button onClick={() => setSelectedCategory('')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Barcha bo'limlar
-          </button>
-        </nav>
-        <div className="max-w-3xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="text-4xl">{cat.icon}</span>
-            <div>
-              <h1 className="font-heading text-2xl font-bold">{cat.title}</h1>
-              <p className="text-muted-foreground">{cat.description}</p>
-            </div>
-          </div>
-          <div className="space-y-3">
-            {cat.subcategories.map((sub, i) => (
-              <motion.button key={sub.id} onClick={() => setSelectedSubCategory(sub.id)} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                className="w-full p-5 rounded-xl border border-border bg-card card-hover text-left flex items-center justify-between">
-                <div>
-                  <h3 className="font-heading font-semibold">{sub.title}</h3>
-                  <p className="text-sm text-muted-foreground">{sub.description}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{sub.courseIds.length} kurs</span>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // All categories
   return (
     <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3">
-        <div className="flex items-center justify-between max-w-3xl mx-auto">
-          <Link to="/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Dashboard
-          </Link>
-          <span className="font-heading font-bold">Kurslar</span>
+      <TopBar />
+      <DailyQuoteModal />
+      <main className="max-w-6xl mx-auto px-4 py-6">
+        <header className="mb-5">
+          <h1 className="font-heading text-3xl font-bold">Kurslar</h1>
+          <p className="text-muted-foreground text-sm mt-1">{courses.length}+ kurs · har biri kunlik vazifalar bilan</p>
+        </header>
+
+        <div className="relative mb-4">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Kurs qidirish..." className="w-full bg-card border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none focus:border-primary" />
         </div>
-      </nav>
-      <div className="max-w-3xl mx-auto px-4 py-6">
-        <h1 className="font-heading text-2xl font-bold mb-6">Barcha bo'limlar</h1>
-        <div className="grid grid-cols-2 gap-3">
-          {categories.map((cat, i) => (
-            <motion.button key={cat.id} onClick={() => setSelectedCategory(cat.id)} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-              className="p-5 rounded-xl border border-border bg-card card-hover text-left">
-              <span className="text-3xl">{cat.icon}</span>
-              <h3 className="font-heading font-semibold mt-2">{cat.title}</h3>
-              <p className="text-xs text-muted-foreground mt-1">{cat.description}</p>
-              <p className="text-xs text-primary mt-2">{cat.subcategories.length} bo'lim</p>
-            </motion.button>
+
+        <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide">
+          {courseCategories.map(c => (
+            <button key={c.id} onClick={() => setCat(c.id)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1 ${cat === c.id ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"}`}>
+              <span>{c.emoji}</span> {c.label}
+            </button>
           ))}
         </div>
-      </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {list.map(c => {
+            const done = (doneDays[c.id] || []).length;
+            const pct = Math.round((done / c.lessons.length) * 100);
+            return (
+              <motion.button key={c.id} whileHover={{ y: -3, scale: 1.01 }} onClick={() => setActive(c)}
+                className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary/40 transition-colors">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="text-3xl">{c.emoji}</div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${c.level === 'beginner' ? 'bg-success/10 text-success' : c.level === 'intermediate' ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>{c.level}</span>
+                </div>
+                <div className="font-heading font-bold text-sm">{c.title}</div>
+                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{c.description}</p>
+                <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span>{c.duration} kun</span>
+                  <span>{pct}%</span>
+                </div>
+                <div className="mt-1 h-1 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+      </main>
     </div>
   );
 }
