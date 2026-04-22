@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, Library, BarChart3, Users, Trophy,
   User as UserIcon, MessageCircle, LogOut, Sun, Moon, Globe, Crown,
-  UserPlus, Settings, Brain, Beaker, Heart, Sparkles,
+  UserPlus, Settings, Brain, Beaker, Heart, Sparkles, Shield, TrendingUp, Power, Lock, Zap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -19,6 +19,12 @@ export default function TopBar() {
   const links = [
     { to: "/dashboard", icon: LayoutDashboard, label: t("dashboard") },
     { to: "/decision-hub", icon: Brain, label: t("decisionEngine") },
+    { to: "/command", icon: Power, label: "Command" },
+    { to: "/focus", icon: Lock, label: "Focus" },
+    { to: "/drills", icon: Zap, label: "Drills" },
+    { to: "/identity", icon: Shield, label: "Identity" },
+    { to: "/simulation", icon: TrendingUp, label: "Simulation" },
+    { to: "/lab", icon: Beaker, label: "Lab" },
     { to: "/courses", icon: BookOpen, label: t("courses") },
     { to: "/books", icon: Library, label: t("books") },
     { to: "/methods", icon: Beaker, label: t("methods") },

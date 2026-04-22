@@ -46,6 +46,18 @@ export default function BuddiesPage() {
     else toast({ title: "Yuborildi", description: "Do'stlik so'rovi yuborildi." });
   }
 
+  async function startChat(other_id: string) {
+    if (!user) { nav("/auth"); return; }
+    // Create new direct conversation
+    const { data: conv, error } = await supabase.from("conversations").insert({ created_by: user.id, type: "direct" }).select().single();
+    if (error || !conv) { toast({ title: "Xato", description: error?.message, variant: "destructive" }); return; }
+    await supabase.from("conversation_participants").insert([
+      { conversation_id: conv.id, user_id: user.id },
+      { conversation_id: conv.id, user_id: other_id },
+    ]);
+    nav(`/chat/${conv.id}`);
+  }
+
   const filtered = list.filter(b => {
     const goalMatch = !b.goals || b.goals.toLowerCase().includes(goal.toLowerCase().split(" ")[0].toLowerCase()) || true;
     const locMatch = !b.country || b.country === loc || loc === "Online (boshqa)";
@@ -113,6 +125,9 @@ export default function BuddiesPage() {
                     className="text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 flex items-center gap-1">
                     <MessageCircle className="w-3 h-3" /> {t("findBuddy")}
                   </button>
+                </div>
+                <div className="flex justify-end mb-2">
+                  <button onClick={() => startChat(b.user_id)} className="text-xs text-primary hover:underline">Chat boshlash →</button>
                 </div>
                 {b.goals && <p className="text-xs text-muted-foreground line-clamp-2">{b.goals}</p>}
               </motion.div>
