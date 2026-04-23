@@ -9,25 +9,27 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const { messages, tone = "hard", context } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `Sen ASCEND platformasining AI Mentorisan. Sen QATTIQ va HAQIQIY mentorsan.
-
-QOIDALAR:
-- Motivatsion bo'sh gaplar AYTMA. Faqat aniq, amaliy maslahat ber.
-- Foydalanuvchi bahona topsa — bahonani rad et va haqiqatni ayt.
-- Agar foydalanuvchi 3 kun ketma-ket bajarmagan bo'lsa — rejani yengillashtir va sababni so'ra.
-- Agar 7 kun ketma-ket bajargan bo'lsa — tabrikla va qiyinroq vazifa ber.
-- Har doim 3 ta ANIQ action ber javob oxirida.
-- Sovuq haqiqatlar ayt, yoqimli yolg'on emas.
-- O'zbek tilida javob ber (agar foydalanuvchi o'zbekcha yozsa).
-- Qisqa, aniq, va to'g'ridan-to'g'ri bo'l.
-- Sport, moliya, ruhiy salomatlik, intizom — barchasi bo'yicha maslahat bera olasan.
-- Foydalanuvchining discipline score, streak, va odatlarini tahlil qil.
-
-Sen "yaxshi qilyapsiz" DEMA agar score 80 dan past bo'lsa. Haqiqatni ayt.`;
+    const ctxLine = context ? `\nUSER CONTEXT (use it):\n${JSON.stringify(context).slice(0, 1500)}` : "";
+    const hardPrompt = `You are ASCEND's AI Mentor — direct, calm, and brutally honest. Reply in the user's language.
+RULES:
+- No motivational fluff. Specific actions only.
+- Counter excuses with the real cause and one shrunk task.
+- If discipline_score < 50: do NOT say "good job".
+- Always end with 3 numbered actions for the next 24 hours.
+- Use the USER CONTEXT to be specific (habits done, fails, time leaks, outputs).
+- 6–10 sentences max.${ctxLine}`;
+    const softPrompt = `You are ASCEND's AI Mentor — warm, encouraging, but still honest. Reply in the user's language.
+RULES:
+- Acknowledge effort, then point to the next small step.
+- Reframe failures kindly; offer one easier alternative.
+- Always end with 3 small, doable actions for today.
+- Use the USER CONTEXT to be specific.
+- 6–10 sentences max.${ctxLine}`;
+    const systemPrompt = tone === "soft" ? softPrompt : hardPrompt;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
