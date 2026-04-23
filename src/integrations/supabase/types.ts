@@ -91,6 +91,102 @@ export type Database = {
         }
         Relationships: []
       }
+      course_progress: {
+        Row: {
+          completed: boolean
+          course_id: string
+          id: string
+          lesson_index: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          course_id: string
+          id?: string
+          lesson_index?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          course_id?: string
+          id?: string
+          lesson_index?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      duels: {
+        Row: {
+          challenger_id: string
+          challenger_score: number | null
+          duration_days: number
+          ends_at: string | null
+          id: string
+          opponent_id: string
+          opponent_score: number | null
+          started_at: string
+          status: string
+          target: string
+          winner_id: string | null
+        }
+        Insert: {
+          challenger_id: string
+          challenger_score?: number | null
+          duration_days?: number
+          ends_at?: string | null
+          id?: string
+          opponent_id: string
+          opponent_score?: number | null
+          started_at?: string
+          status?: string
+          target: string
+          winner_id?: string | null
+        }
+        Update: {
+          challenger_id?: string
+          challenger_score?: number | null
+          duration_days?: number
+          ends_at?: string | null
+          id?: string
+          opponent_id?: string
+          opponent_score?: number | null
+          started_at?: string
+          status?: string
+          target?: string
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
+      excuses: {
+        Row: {
+          category: string | null
+          counter: string | null
+          created_at: string
+          excuse_text: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          counter?: string | null
+          created_at?: string
+          excuse_text: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          counter?: string | null
+          created_at?: string
+          excuse_text?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       experiments: {
         Row: {
           after_score: number | null
@@ -127,6 +223,30 @@ export type Database = {
           status?: string
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      fail_log: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+          what_failed: string
+          xp_lost: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+          what_failed: string
+          xp_lost?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+          what_failed?: string
+          xp_lost?: number
         }
         Relationships: []
       }
@@ -225,6 +345,51 @@ export type Database = {
         }
         Relationships: []
       }
+      health_logs: {
+        Row: {
+          created_at: string
+          energy_level: number | null
+          id: string
+          log_date: string
+          mood: string | null
+          notes: string | null
+          sleep_hours: number | null
+          steps: number | null
+          stress_level: number | null
+          user_id: string
+          water_glasses: number | null
+          weight_kg: number | null
+        }
+        Insert: {
+          created_at?: string
+          energy_level?: number | null
+          id?: string
+          log_date?: string
+          mood?: string | null
+          notes?: string | null
+          sleep_hours?: number | null
+          steps?: number | null
+          stress_level?: number | null
+          user_id: string
+          water_glasses?: number | null
+          weight_kg?: number | null
+        }
+        Update: {
+          created_at?: string
+          energy_level?: number | null
+          id?: string
+          log_date?: string
+          mood?: string | null
+          notes?: string | null
+          sleep_hours?: number | null
+          steps?: number | null
+          stress_level?: number | null
+          user_id?: string
+          water_glasses?: number | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -280,6 +445,36 @@ export type Database = {
           created_at?: string
           id?: string
           prompt?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      outputs: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          log_date: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          log_date?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          log_date?: string
+          title?: string
           user_id?: string
         }
         Relationships: []
@@ -391,6 +586,36 @@ export type Database = {
           updated_at?: string
           user_id?: string
           xp?: number
+        }
+        Relationships: []
+      }
+      time_logs: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          label: string | null
+          log_date: string
+          minutes: number
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          log_date?: string
+          minutes: number
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          log_date?: string
+          minutes?: number
+          user_id?: string
         }
         Relationships: []
       }

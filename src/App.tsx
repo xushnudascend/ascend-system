@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { I18nProvider } from "@/hooks/useI18n";
+import { CoachToneProvider } from "@/hooks/useCoachTone";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -33,6 +34,14 @@ import CommandModePage from "./pages/CommandModePage";
 import ExperimentLabPage from "./pages/ExperimentLabPage";
 import FocusLockPage from "./pages/FocusLockPage";
 import ChatPage from "./pages/ChatPage";
+import HealthPage from "./pages/HealthPage";
+import TimeLeakPage from "./pages/TimeLeakPage";
+import OutputsPage from "./pages/OutputsPage";
+import ExcusesPage from "./pages/ExcusesPage";
+import FailLogPage from "./pages/FailLogPage";
+import DuelsPage from "./pages/DuelsPage";
+import TrajectoryPage from "./pages/TrajectoryPage";
+import AutoRoutinePage from "./pages/AutoRoutinePage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +49,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <I18nProvider>
+        <CoachToneProvider>
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
@@ -72,11 +82,20 @@ const App = () => (
                 <Route path="/lab" element={<ExperimentLabPage />} />
                 <Route path="/focus" element={<FocusLockPage />} />
                 <Route path="/chat/:id" element={<ChatPage />} />
+                <Route path="/health" element={<HealthPage />} />
+                <Route path="/time-leak" element={<TimeLeakPage />} />
+                <Route path="/outputs" element={<OutputsPage />} />
+                <Route path="/excuses" element={<ExcusesPage />} />
+                <Route path="/fail-log" element={<FailLogPage />} />
+                <Route path="/duels" element={<DuelsPage />} />
+                <Route path="/trajectory" element={<TrajectoryPage />} />
+                <Route path="/auto-routine" element={<AutoRoutinePage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
+        </CoachToneProvider>
       </I18nProvider>
     </ThemeProvider>
   </QueryClientProvider>

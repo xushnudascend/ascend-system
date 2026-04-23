@@ -1,76 +1,48 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, BookOpen, Library, BarChart3, Users, Trophy,
-  User as UserIcon, MessageCircle, LogOut, Sun, Moon, Globe, Crown,
-  UserPlus, Settings, Brain, Beaker, Heart, Sparkles, Shield, TrendingUp, Power, Lock, Zap,
+  LogOut, Sun, Moon, Globe, Menu, Flame, HeartHandshake,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
-import { useI18n, type Lang } from "@/hooks/useI18n";
+import { useI18n, type Lang, LANG_NAMES } from "@/hooks/useI18n";
+import { useCoachTone } from "@/hooks/useCoachTone";
 import { useState } from "react";
+import AppSidebar from "./AppSidebar";
 
 export default function TopBar() {
   const { signOut, user } = useAuth();
   const { theme, toggle } = useTheme();
   const { lang, setLang, t } = useI18n();
+  const { tone, toggle: toggleTone } = useCoachTone();
   const loc = useLocation();
   const [openLang, setOpenLang] = useState(false);
-
-  const links = [
-    { to: "/dashboard", icon: LayoutDashboard, label: t("dashboard") },
-    { to: "/decision-hub", icon: Brain, label: t("decisionEngine") },
-    { to: "/command", icon: Power, label: "Command" },
-    { to: "/focus", icon: Lock, label: "Focus" },
-    { to: "/drills", icon: Zap, label: "Drills" },
-    { to: "/identity", icon: Shield, label: "Identity" },
-    { to: "/simulation", icon: TrendingUp, label: "Simulation" },
-    { to: "/lab", icon: Beaker, label: "Lab" },
-    { to: "/courses", icon: BookOpen, label: t("courses") },
-    { to: "/books", icon: Library, label: t("books") },
-    { to: "/methods", icon: Beaker, label: t("methods") },
-    { to: "/calm", icon: Heart, label: t("calm") },
-    { to: "/characters", icon: Sparkles, label: t("characters") },
-    { to: "/analytics", icon: BarChart3, label: t("analytics") },
-    { to: "/community", icon: Users, label: t("community") },
-    { to: "/buddies", icon: UserPlus, label: t("buddies") },
-    { to: "/friends", icon: UserPlus, label: t("friends") },
-    { to: "/leaderboard", icon: Trophy, label: t("leaderboard") },
-    { to: "/profile", icon: UserIcon, label: t("profile") },
-    { to: "/ai-mentor", icon: MessageCircle, label: t("aiMentor") },
-    { to: "/pricing", icon: Crown, label: t("pricing") },
-    { to: "/settings", icon: Settings, label: t("settings") },
-  ];
+  const [openMenu, setOpenMenu] = useState(false);
 
   return (
+    <>
     <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
         <Link to="/dashboard" className="font-heading text-lg font-bold shrink-0">
           ASCEND<span className="text-primary">.</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-1 overflow-x-auto">
-          {links.map(l => {
-            const active = loc.pathname === l.to;
-            return (
-              <Link key={l.to} to={l.to}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-                <l.icon className="w-3.5 h-3.5" /> {l.label}
-              </Link>
-            );
-          })}
-        </div>
-
         <div className="flex items-center gap-1 shrink-0">
+          <button onClick={toggleTone}
+            className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold ${tone === "hard" ? "text-rose-400 hover:bg-rose-500/10" : "text-emerald-400 hover:bg-emerald-500/10"}`}
+            aria-label="Coach tone">
+            {tone === "hard" ? <Flame className="w-4 h-4" /> : <HeartHandshake className="w-4 h-4" />}
+            <span className="hidden sm:inline">{tone === "hard" ? "Hard" : "Soft"}</span>
+          </button>
           <div className="relative">
             <button onClick={() => setOpenLang(o => !o)} className="p-2 rounded-lg hover:bg-card transition-colors flex items-center gap-1 text-xs text-muted-foreground">
               <Globe className="w-4 h-4" /> {lang.toUpperCase()}
             </button>
             {openLang && (
-              <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden z-50">
-                {(["uz", "en", "ru", "tr"] as Lang[]).map(l => (
+              <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden z-50 max-h-80 overflow-y-auto min-w-[140px]">
+                {(Object.keys(LANG_NAMES) as Lang[]).map(l => (
                   <button key={l} onClick={() => { setLang(l); setOpenLang(false); }}
                     className={`block w-full px-4 py-2 text-xs text-left hover:bg-muted ${lang === l ? "text-primary font-medium" : ""}`}>
-                    {l === "uz" ? "O'zbek" : l === "en" ? "English" : l === "ru" ? "Русский" : "Türkçe"}
+                    {LANG_NAMES[l]}
                   </button>
                 ))}
               </div>
@@ -84,21 +56,22 @@ export default function TopBar() {
               <LogOut className="w-4 h-4" />
             </button>
           )}
+          <button onClick={() => setOpenMenu(true)} className="p-2 rounded-lg hover:bg-card transition-colors text-muted-foreground" aria-label="Open menu">
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
       </div>
-
-      {/* Mobile pill nav */}
-      <div className="md:hidden flex items-center gap-1 overflow-x-auto px-3 pb-2 scrollbar-hide">
-        {links.map(l => {
-          const active = loc.pathname === l.to;
-          return (
-            <Link key={l.to} to={l.to}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1 ${active ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"}`}>
-              <l.icon className="w-3.5 h-3.5" /> {l.label}
-            </Link>
-          );
-        })}
-      </div>
     </nav>
+
+    {/* Slide-out sidebar */}
+    {openMenu && (
+      <div className="fixed inset-0 z-[60]">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setOpenMenu(false)} />
+        <div className="absolute right-0 top-0 h-full animate-slide-in-right">
+          <AppSidebar onClose={() => setOpenMenu(false)} />
+        </div>
+      </div>
+    )}
+    </>
   );
 }

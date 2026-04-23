@@ -1,6 +1,12 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-export type Lang = "uz" | "en" | "ru" | "tr";
+export type Lang = "uz" | "en" | "ru" | "tr" | "ar" | "es" | "fr" | "de" | "zh" | "hi" | "kk" | "ky";
+
+export const LANG_NAMES: Record<Lang, string> = {
+  uz: "O'zbek", en: "English", ru: "Русский", tr: "Türkçe",
+  ar: "العربية", es: "Español", fr: "Français", de: "Deutsch",
+  zh: "中文", hi: "हिन्दी", kk: "Қазақша", ky: "Кыргызча",
+};
 
 const baseUz = {
   dashboard: "Boshqaruv", courses: "Kurslar", books: "Kutubxona",
@@ -126,14 +132,33 @@ const baseTr = {
   beastMode: "Vahşi mod", normalMode: "Normal", recoveryMode: "Toparlanma",
   noEscape: "Kaçış yok", focusNow: "Şimdi odaklan", startSession: "Oturum başlat",
 };
-const dict: Record<Lang, Record<string, string>> = { uz: baseUz, en: baseEn, ru: baseRu, tr: baseTr };
+// Auto-fallback to English for languages we haven't fully translated yet.
+// Keys still resolve via fallback in t().
+const baseAr = { ...baseEn };
+const baseEs = { ...baseEn };
+const baseFr = { ...baseEn };
+const baseDe = { ...baseEn };
+const baseZh = { ...baseEn };
+const baseHi = { ...baseEn };
+const baseKk = { ...baseRu };
+const baseKy = { ...baseRu };
+
+const dict: Record<Lang, Record<string, string>> = {
+  uz: baseUz, en: baseEn, ru: baseRu, tr: baseTr,
+  ar: baseAr, es: baseEs, fr: baseFr, de: baseDe,
+  zh: baseZh, hi: baseHi, kk: baseKk, ky: baseKy,
+};
 
 interface I18nCtx { lang: Lang; setLang: (l: Lang) => void; t: (k: string) => string; }
 const I18nContext = createContext<I18nCtx | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => (localStorage.getItem("ascend_lang") as Lang) || "uz");
-  const setLang = (l: Lang) => { setLangState(l); localStorage.setItem("ascend_lang", l); document.documentElement.lang = l; };
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [lang]);
+  const setLang = (l: Lang) => { setLangState(l); localStorage.setItem("ascend_lang", l); };
   const t = (k: string) => dict[lang][k] ?? dict.en[k] ?? k;
   return <I18nContext.Provider value={{ lang, setLang, t }}>{children}</I18nContext.Provider>;
 }
