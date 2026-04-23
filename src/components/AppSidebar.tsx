@@ -4,6 +4,7 @@ import {
   User as UserIcon, MessageCircle, Crown, UserPlus, Settings, Brain,
   Beaker, Heart, Sparkles, Shield, TrendingUp, Power, Lock, Zap,
   Activity, Clock, Target, AlertOctagon, Swords, LineChart, CalendarClock,
+  FileSignature, Search, ClipboardCheck,
 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 
@@ -21,6 +22,7 @@ export default function AppSidebar({ onClose }: Props) {
         { to: "/health", icon: Heart, label: "Health & Energy" },
         { to: "/analytics", icon: BarChart3, label: t("analytics") },
         { to: "/trajectory", icon: LineChart, label: "Trajectory" },
+        { to: "/feedback", icon: ClipboardCheck, label: "Daily Feedback" },
       ],
     },
     {
@@ -30,6 +32,8 @@ export default function AppSidebar({ onClose }: Props) {
         { to: "/command", icon: Power, label: "Command" },
         { to: "/auto-routine", icon: CalendarClock, label: "Auto Routine" },
         { to: "/focus", icon: Lock, label: "Focus Lock" },
+        { to: "/contracts", icon: FileSignature, label: "Contracts" },
+        { to: "/root-cause", icon: Search, label: "Root Cause" },
         { to: "/drills", icon: Zap, label: "Drills" },
         { to: "/identity", icon: Shield, label: "Identity" },
         { to: "/simulation", icon: TrendingUp, label: "Simulation" },
