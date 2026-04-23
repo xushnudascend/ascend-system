@@ -3,6 +3,7 @@ import { Lock, Play, AlertTriangle, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import TopBar from "@/components/TopBar";
 import DailyQuoteModal from "@/components/DailyQuoteModal";
+import RealityCheck from "@/components/RealityCheck";
 
 export default function FocusLockPage() {
   const [task, setTask] = useState("");
@@ -41,6 +42,7 @@ export default function FocusLockPage() {
     <div className="min-h-screen bg-background">
       <TopBar />
       <DailyQuoteModal />
+      <RealityCheck active={state === "running"} intervalSec={300} />
       <main className="max-w-2xl mx-auto px-4 py-6">
         <header className="mb-6">
           <h1 className="font-heading text-3xl font-bold flex items-center gap-2">
