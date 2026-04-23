@@ -3,7 +3,10 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Clock, BarChart, CheckCircle2, Search } from "lucide-react";
 import TopBar from "@/components/TopBar";
 import DailyQuoteModal from "@/components/DailyQuoteModal";
-import { courses, courseCategories, type Course } from "@/data/courses";
+import { courses as baseCourses, courseCategories, type Course } from "@/data/courses";
+import { coursesExtra } from "@/data/coursesExtra";
+
+const courses: Course[] = [...baseCourses, ...coursesExtra];
 
 export default function CoursesPage() {
   const [cat, setCat] = useState("all");

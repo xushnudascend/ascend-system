@@ -153,7 +153,7 @@ interface I18nCtx { lang: Lang; setLang: (l: Lang) => void; t: (k: string) => st
 const I18nContext = createContext<I18nCtx | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => (localStorage.getItem("ascend_lang") as Lang) || "uz");
+  const [lang, setLangState] = useState<Lang>(() => (localStorage.getItem("ascend_lang") as Lang) || "en");
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";

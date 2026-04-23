@@ -3,10 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, ArrowLeft, Loader2, Search } from "lucide-react";
 import TopBar from "@/components/TopBar";
 import DailyQuoteModal from "@/components/DailyQuoteModal";
-import { characters, characterCategories, type Character } from "@/data/characters";
+import { characters as baseChars, characterCategories, type Character } from "@/data/characters";
+import { charactersExtra } from "@/data/charactersExtra";
 import { useI18n } from "@/hooks/useI18n";
 
 type Msg = { role: "user" | "assistant"; content: string };
+
+const characters: Character[] = [...baseChars, ...charactersExtra];
 
 export default function CharactersPage() {
   const { t } = useI18n();
