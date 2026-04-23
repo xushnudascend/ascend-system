@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_recommendations: {
+        Row: {
+          context: Json | null
+          created_at: string
+          id: string
+          next_step: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          id?: string
+          next_step: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          id?: string
+          next_step?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -34,6 +61,48 @@ export type Database = {
           created_at?: string
           id?: string
           role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      contracts: {
+        Row: {
+          completed_days: number
+          created_at: string
+          duration_days: number
+          ends_at: string | null
+          id: string
+          stake_xp: number
+          started_at: string
+          status: string
+          target: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          completed_days?: number
+          created_at?: string
+          duration_days?: number
+          ends_at?: string | null
+          id?: string
+          stake_xp?: number
+          started_at?: string
+          status?: string
+          target: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          completed_days?: number
+          created_at?: string
+          duration_days?: number
+          ends_at?: string | null
+          id?: string
+          stake_xp?: number
+          started_at?: string
+          status?: string
+          target?: string
+          title?: string
           user_id?: string
         }
         Relationships: []
@@ -114,6 +183,42 @@ export type Database = {
           id?: string
           lesson_index?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      daily_feedback: {
+        Row: {
+          adaptation: string | null
+          analysis: string | null
+          created_at: string
+          feedback: string | null
+          id: string
+          input_summary: string | null
+          log_date: string
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          adaptation?: string | null
+          analysis?: string | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          input_summary?: string | null
+          log_date?: string
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          adaptation?: string | null
+          analysis?: string | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          input_summary?: string | null
+          log_date?: string
+          score?: number | null
           user_id?: string
         }
         Relationships: []
@@ -479,6 +584,33 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_adaptations: {
+        Row: {
+          created_at: string
+          details: string | null
+          direction: string
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          direction: string
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          direction?: string
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_likes: {
         Row: {
           created_at: string
@@ -586,6 +718,33 @@ export type Database = {
           updated_at?: string
           user_id?: string
           xp?: number
+        }
+        Relationships: []
+      }
+      root_causes: {
+        Row: {
+          category: string | null
+          cause: string
+          created_at: string
+          failure: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          cause: string
+          created_at?: string
+          failure: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          cause?: string
+          created_at?: string
+          failure?: string
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }
