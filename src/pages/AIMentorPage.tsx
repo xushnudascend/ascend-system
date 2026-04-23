@@ -3,6 +3,9 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Send, Loader2, Brain, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { useAuth } from "@/hooks/useAuth";
+import { useCoachTone } from "@/hooks/useCoachTone";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Msg {
   role: "user" | "assistant";
@@ -13,11 +16,15 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-mentor`;
 
 async function streamChat({
   messages,
+  tone,
+  context,
   onDelta,
   onDone,
   onError,
 }: {
   messages: Msg[];
+  tone: "hard" | "soft";
+  context?: any;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (msg: string) => void;
@@ -28,7 +35,7 @@ async function streamChat({
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, tone, context }),
   });
 
   if (!resp.ok) {
@@ -77,14 +84,31 @@ const quickQuestions = [
 ];
 
 export default function AIMentorPage() {
+  const { user } = useAuth();
+  const { tone } = useCoachTone();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [ctx, setCtx] = useState<any>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const date = new Date().toISOString().slice(0, 10);
+      const [{ data: profile }, { data: outputs }, { data: time }, { data: fails }] = await Promise.all([
+        supabase.from("profiles").select("xp,streak,discipline_score,rank").eq("user_id", user.id).maybeSingle(),
+        supabase.from("outputs").select("title").eq("user_id", user.id).gte("log_date", date).limit(5),
+        supabase.from("time_logs").select("category,minutes").eq("user_id", user.id).eq("log_date", date),
+        supabase.from("fail_log").select("what_failed").eq("user_id", user.id).gte("created_at", date).limit(5),
+      ]);
+      setCtx({ profile, outputs, time, fails });
+    })();
+  }, [user]);
 
   const send = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -108,6 +132,8 @@ export default function AIMentorPage() {
 
     await streamChat({
       messages: newMessages,
+      tone,
+      context: ctx,
       onDelta: upsertAssistant,
       onDone: () => setIsLoading(false),
       onError: (msg) => {
