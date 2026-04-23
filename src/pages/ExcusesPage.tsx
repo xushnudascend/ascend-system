@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, Plus, Trash2, Sparkles } from "lucide-react";
+import { Activity, Plus, Trash2, Sparkles, Zap, Loader2 } from "lucide-react";
 import TopBar from "@/components/TopBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +19,9 @@ export default function ExcusesPage() {
   const { tone } = useCoachTone();
   const [items, setItems] = useState<any[]>([]);
   const [text, setText] = useState("");
+  const [originalTask, setOriginalTask] = useState("");
+  const [override, setOverride] = useState<{ counter: string; shrunk_task: string; min_time_min: number } | null>(null);
+  const [overriding, setOverriding] = useState(false);
 
   async function load() {
     if (!user) return;
@@ -43,6 +46,23 @@ export default function ExcusesPage() {
   }
   async function del(id: string) { await supabase.from("excuses").delete().eq("id", id); load(); }
 
+  async function runOverride() {
+    if (!text.trim() || !originalTask.trim()) return toast.error("Original task and excuse needed");
+    setOverriding(true); setOverride(null);
+    try {
+      const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coach-override`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        body: JSON.stringify({ excuse: text, originalTask, tone }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Failed");
+      setOverride(data);
+      if (user) await supabase.from("excuses").insert({ user_id: user.id, excuse_text: text, category: "override", counter: data.counter });
+      load();
+    } catch (e: any) { toast.error(e.message); } finally { setOverriding(false); }
+  }
+
   return (
     <div className="min-h-screen bg-background"><TopBar />
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
@@ -51,9 +71,25 @@ export default function ExcusesPage() {
           <p className="text-muted-foreground text-sm mt-1">Bahonalaringizni yozing — sistema darhol javob beradi va saqlaydi.</p>
         </header>
         <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Coach Override</div>
+          <input value={originalTask} onChange={e => setOriginalTask(e.target.value)} placeholder="Original task (e.g. 1 hour gym)"
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary mb-2" />
           <textarea value={text} onChange={e => setText(e.target.value)} rows={3} placeholder="Bahonangizni yozing... (masalan: 'bugun vaqtim yo'q')"
             className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
-          <button onClick={add} className="mt-3 px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center gap-2"><Plus className="w-4 h-4" /> Yozish va counter olish</button>
+          <div className="flex gap-2 mt-3 flex-wrap">
+            <button onClick={add} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center gap-2"><Plus className="w-4 h-4" /> Log + counter</button>
+            <button onClick={runOverride} disabled={overriding} className="px-4 py-2 rounded-lg bg-amber-500 text-background text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
+              {overriding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />} Coach Override
+            </button>
+          </div>
+          {override && (
+            <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+              <div className="text-xs uppercase text-amber-400 font-bold">Override result</div>
+              <div className="text-sm"><b>Counter:</b> {override.counter}</div>
+              <div className="text-sm"><b>Shrunk task:</b> {override.shrunk_task}</div>
+              <div className="text-xs text-muted-foreground">Min time: {override.min_time_min} min · No skip allowed.</div>
+            </div>
+          )}
         </div>
         <div className="space-y-2">
           {items.map(i => (
