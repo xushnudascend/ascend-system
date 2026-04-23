@@ -29,8 +29,10 @@ export default function DuelsPage() {
   }
 
   async function score(d: any, who: "ch" | "op", inc: number) {
-    const field = who === "ch" ? "challenger_score" : "opponent_score";
-    await supabase.from("duels").update({ [field]: (d[field] || 0) + inc }).eq("id", d.id); load();
+    const update = who === "ch"
+      ? { challenger_score: (d.challenger_score || 0) + inc }
+      : { opponent_score: (d.opponent_score || 0) + inc };
+    await supabase.from("duels").update(update).eq("id", d.id); load();
   }
 
   return (
