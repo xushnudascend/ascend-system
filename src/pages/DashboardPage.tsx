@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import TopBar from "@/components/TopBar";
+import TimeLeakWidget from "@/components/TimeLeakWidget";
 
 interface Habit {
   id: string;
@@ -325,6 +326,8 @@ export default function DashboardPage() {
             })}
           </div>
         </motion.div>
+
+        <TimeLeakWidget />
       </div>
     </div>
   );

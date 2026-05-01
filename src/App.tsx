@@ -45,6 +45,12 @@ import AutoRoutinePage from "./pages/AutoRoutinePage";
 import ContractsPage from "./pages/ContractsPage";
 import RootCausePage from "./pages/RootCausePage";
 import DailyFeedbackPage from "./pages/DailyFeedbackPage";
+import WorkoutsPage from "./pages/WorkoutsPage";
+import NutritionPage from "./pages/NutritionPage";
+import IdentityQuizPage from "./pages/IdentityQuizPage";
+import LifeScorePage from "./pages/LifeScorePage";
+import WarRoomPage from "./pages/WarRoomPage";
+import WinsWallPage from "./pages/WinsWallPage";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +102,12 @@ const App = () => (
                 <Route path="/contracts" element={<ContractsPage />} />
                 <Route path="/root-cause" element={<RootCausePage />} />
                 <Route path="/feedback" element={<DailyFeedbackPage />} />
+                <Route path="/workouts" element={<WorkoutsPage />} />
+                <Route path="/nutrition" element={<NutritionPage />} />
+                <Route path="/identity-quiz" element={<IdentityQuizPage />} />
+                <Route path="/life-score" element={<LifeScorePage />} />
+                <Route path="/war-room" element={<WarRoomPage />} />
+                <Route path="/wins" element={<WinsWallPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

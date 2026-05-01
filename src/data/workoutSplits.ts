@@ -1,0 +1,247 @@
+// Real workout splits with exercises, sets, reps, RPE guidance
+export interface ExerciseSpec { name: string; sets: number; reps: string; rpe?: string; notes?: string }
+export interface DaySpec { name: string; focus: string; exercises: ExerciseSpec[] }
+export interface SplitSpec { id: string; title: string; level: 'beginner'|'intermediate'|'advanced'; freq: string; goal: string; description: string; days: DaySpec[]; tips: string[] }
+
+export const splits: SplitSpec[] = [
+  {
+    id: 'ppl', title: 'Push / Pull / Legs (6 days)', level: 'intermediate', freq: '6x/week', goal: 'Hypertrophy + strength',
+    description: 'Klassik 6 kunlik split. Har bir muskul guruhi haftada 2 marta. Eng ko\'p natijali splitlardan biri.',
+    tips: ['8–12 rep — gipertrofiya, 4–6 — kuch.', 'RPE 7–9 ishlash zonasi.', 'Har hafta 2.5 kg yoki 1 rep oshiring.'],
+    days: [
+      { name: 'Push A', focus: 'Chest / Shoulders / Triceps', exercises: [
+        { name: 'Bench Press', sets: 4, reps: '6–8', rpe: '8' },
+        { name: 'Incline DB Press', sets: 3, reps: '8–10', rpe: '8' },
+        { name: 'Overhead Press', sets: 3, reps: '6–8', rpe: '8' },
+        { name: 'Lateral Raise', sets: 4, reps: '12–15', rpe: '9' },
+        { name: 'Tricep Pushdown', sets: 3, reps: '10–12', rpe: '9' },
+        { name: 'Overhead Tricep Ext.', sets: 3, reps: '10–12', rpe: '9' },
+      ]},
+      { name: 'Pull A', focus: 'Back / Biceps', exercises: [
+        { name: 'Deadlift', sets: 3, reps: '5', rpe: '8' },
+        { name: 'Pull-Up / Lat Pulldown', sets: 4, reps: '6–10', rpe: '8' },
+        { name: 'Barbell Row', sets: 3, reps: '8–10', rpe: '8' },
+        { name: 'Face Pull', sets: 3, reps: '15', rpe: '8' },
+        { name: 'Barbell Curl', sets: 3, reps: '8–10', rpe: '9' },
+        { name: 'Hammer Curl', sets: 3, reps: '10–12', rpe: '9' },
+      ]},
+      { name: 'Legs A', focus: 'Quads / Glutes / Hamstrings / Calves', exercises: [
+        { name: 'Back Squat', sets: 4, reps: '5–8', rpe: '8' },
+        { name: 'Romanian Deadlift', sets: 3, reps: '8–10', rpe: '8' },
+        { name: 'Leg Press', sets: 3, reps: '10–12', rpe: '8' },
+        { name: 'Leg Curl', sets: 3, reps: '10–12', rpe: '9' },
+        { name: 'Standing Calf Raise', sets: 4, reps: '10–15', rpe: '9' },
+      ]},
+      { name: 'Push B', focus: 'Shoulders / Chest / Triceps', exercises: [
+        { name: 'Overhead Press', sets: 4, reps: '5–7', rpe: '8' },
+        { name: 'Incline Bench', sets: 3, reps: '6–8', rpe: '8' },
+        { name: 'DB Lateral Raise', sets: 4, reps: '12–15', rpe: '9' },
+        { name: 'Cable Fly', sets: 3, reps: '12–15', rpe: '9' },
+        { name: 'Skull Crusher', sets: 3, reps: '8–10', rpe: '9' },
+      ]},
+      { name: 'Pull B', focus: 'Back width + arms', exercises: [
+        { name: 'Weighted Pull-Up', sets: 4, reps: '5–8', rpe: '8' },
+        { name: 'Pendlay Row', sets: 3, reps: '6–8', rpe: '8' },
+        { name: 'Cable Row', sets: 3, reps: '10–12', rpe: '8' },
+        { name: 'Rear Delt Fly', sets: 3, reps: '12–15', rpe: '9' },
+        { name: 'Preacher Curl', sets: 3, reps: '8–10', rpe: '9' },
+      ]},
+      { name: 'Legs B', focus: 'Posterior chain', exercises: [
+        { name: 'Conventional Deadlift', sets: 3, reps: '3–5', rpe: '8' },
+        { name: 'Front Squat', sets: 3, reps: '6–8', rpe: '8' },
+        { name: 'Hip Thrust', sets: 3, reps: '8–10', rpe: '8' },
+        { name: 'Bulgarian Split Squat', sets: 3, reps: '10/leg', rpe: '8' },
+        { name: 'Seated Calf Raise', sets: 4, reps: '12–15', rpe: '9' },
+      ]},
+    ],
+  },
+  {
+    id: 'ul', title: 'Upper / Lower (4 days)', level: 'beginner', freq: '4x/week', goal: 'Balance & recovery',
+    description: 'Eng yaxshi vaqt-natija nisbati. Boshlovchilar va o\'rtachalar uchun.',
+    tips: ['Rest 2–3 daq compoundlarda.', 'Progressiv yuk — har hafta.', '7–9 soat uyqu.'],
+    days: [
+      { name: 'Upper A', focus: 'Strength', exercises: [
+        { name: 'Bench Press', sets: 4, reps: '6–8', rpe: '8' },
+        { name: 'Barbell Row', sets: 4, reps: '6–8', rpe: '8' },
+        { name: 'OHP', sets: 3, reps: '6–8', rpe: '8' },
+        { name: 'Pull-Up', sets: 3, reps: 'AMRAP', rpe: '9' },
+        { name: 'Dips', sets: 3, reps: '8–12', rpe: '9' },
+        { name: 'Curl', sets: 3, reps: '10', rpe: '9' },
+      ]},
+      { name: 'Lower A', focus: 'Squat focus', exercises: [
+        { name: 'Back Squat', sets: 4, reps: '5–8', rpe: '8' },
+        { name: 'RDL', sets: 3, reps: '8–10', rpe: '8' },
+        { name: 'Leg Press', sets: 3, reps: '10', rpe: '8' },
+        { name: 'Leg Curl', sets: 3, reps: '10', rpe: '9' },
+        { name: 'Calf Raise', sets: 4, reps: '12', rpe: '9' },
+      ]},
+      { name: 'Upper B', focus: 'Hypertrophy', exercises: [
+        { name: 'Incline Bench', sets: 4, reps: '8–10', rpe: '8' },
+        { name: 'Cable Row', sets: 4, reps: '10', rpe: '8' },
+        { name: 'DB Shoulder Press', sets: 3, reps: '8–10', rpe: '8' },
+        { name: 'Lat Pulldown', sets: 3, reps: '10', rpe: '8' },
+        { name: 'Lateral Raise', sets: 4, reps: '12–15', rpe: '9' },
+        { name: 'Tricep + Curl superset', sets: 3, reps: '12', rpe: '9' },
+      ]},
+      { name: 'Lower B', focus: 'Deadlift focus', exercises: [
+        { name: 'Deadlift', sets: 4, reps: '5', rpe: '8' },
+        { name: 'Front Squat', sets: 3, reps: '6–8', rpe: '8' },
+        { name: 'Hip Thrust', sets: 3, reps: '10', rpe: '8' },
+        { name: 'Lunges', sets: 3, reps: '10/leg', rpe: '8' },
+        { name: 'Calf Raise', sets: 4, reps: '12', rpe: '9' },
+      ]},
+    ],
+  },
+  {
+    id: 'bro', title: 'Bro Split (5 days)', level: 'intermediate', freq: '5x/week', goal: 'Bodybuilding aesthetic',
+    description: 'Klassik kulturizm split. Har kun bitta muskul guruhi.',
+    tips: ['Volume ustuvor: 12–20 set/hafta muskul guruhiga.', 'Pump uchun 8–15 rep.', 'Mind-muscle connection.'],
+    days: [
+      { name: 'Chest', focus: 'Pectorals', exercises: [
+        { name: 'Bench Press', sets: 4, reps: '6–10', rpe: '8' },
+        { name: 'Incline DB', sets: 4, reps: '8–10', rpe: '8' },
+        { name: 'Cable Fly', sets: 3, reps: '12–15', rpe: '9' },
+        { name: 'Dips', sets: 3, reps: '10–12', rpe: '9' },
+        { name: 'Push-Up burnout', sets: 2, reps: 'AMRAP', rpe: '10' },
+      ]},
+      { name: 'Back', focus: 'Width + thickness', exercises: [
+        { name: 'Deadlift', sets: 3, reps: '5', rpe: '8' },
+        { name: 'Pull-Up', sets: 4, reps: '8–10', rpe: '9' },
+        { name: 'Barbell Row', sets: 4, reps: '8–10', rpe: '8' },
+        { name: 'T-Bar Row', sets: 3, reps: '10', rpe: '8' },
+        { name: 'Face Pull', sets: 3, reps: '15', rpe: '8' },
+      ]},
+      { name: 'Legs', focus: 'Quad + Ham + Calf', exercises: [
+        { name: 'Squat', sets: 5, reps: '6–10', rpe: '8' },
+        { name: 'Leg Press', sets: 4, reps: '10–12', rpe: '8' },
+        { name: 'RDL', sets: 3, reps: '8–10', rpe: '8' },
+        { name: 'Leg Curl', sets: 3, reps: '12', rpe: '9' },
+        { name: 'Calf Raise', sets: 5, reps: '12–15', rpe: '9' },
+      ]},
+      { name: 'Shoulders', focus: 'Delts', exercises: [
+        { name: 'OHP', sets: 4, reps: '6–8', rpe: '8' },
+        { name: 'Arnold Press', sets: 3, reps: '8–10', rpe: '8' },
+        { name: 'Lateral Raise', sets: 5, reps: '12–15', rpe: '9' },
+        { name: 'Rear Delt Fly', sets: 4, reps: '12–15', rpe: '9' },
+        { name: 'Shrugs', sets: 3, reps: '12', rpe: '9' },
+      ]},
+      { name: 'Arms', focus: 'Biceps + Triceps', exercises: [
+        { name: 'Barbell Curl', sets: 4, reps: '8–10', rpe: '9' },
+        { name: 'Hammer Curl', sets: 3, reps: '10–12', rpe: '9' },
+        { name: 'Preacher Curl', sets: 3, reps: '10', rpe: '9' },
+        { name: 'Close-Grip Bench', sets: 4, reps: '8–10', rpe: '8' },
+        { name: 'Skull Crusher', sets: 3, reps: '10', rpe: '9' },
+        { name: 'Tricep Pushdown', sets: 3, reps: '12', rpe: '9' },
+      ]},
+    ],
+  },
+  {
+    id: '5x5', title: 'StrongLifts 5x5 (3 days)', level: 'beginner', freq: '3x/week', goal: 'Pure strength',
+    description: 'Eng oddiy, eng samarali kuch dasturi. A va B kunlari almashinadi.',
+    tips: ['Har mashq 5 set x 5 rep.', 'Har trening +2.5 kg (squat/dl +5 kg).', 'Failure bo\'lsa 3 marta — 10% deload.'],
+    days: [
+      { name: 'A', focus: 'Squat / Bench / Row', exercises: [
+        { name: 'Squat', sets: 5, reps: '5', rpe: '8' },
+        { name: 'Bench', sets: 5, reps: '5', rpe: '8' },
+        { name: 'Barbell Row', sets: 5, reps: '5', rpe: '8' },
+      ]},
+      { name: 'B', focus: 'Squat / OHP / Deadlift', exercises: [
+        { name: 'Squat', sets: 5, reps: '5', rpe: '8' },
+        { name: 'OHP', sets: 5, reps: '5', rpe: '8' },
+        { name: 'Deadlift', sets: 1, reps: '5', rpe: '8' },
+      ]},
+    ],
+  },
+  {
+    id: 'fbw', title: 'Full Body (3 days)', level: 'beginner', freq: '3x/week', goal: 'Time-efficient',
+    description: 'Kam vaqt — maksimal natija. Mon/Wed/Fri.',
+    tips: ['Compoundlar ustuvor.', 'Har trening 45–60 daqiqa.', 'Yakshanba — to\'liq dam.'],
+    days: [
+      { name: 'Day 1', focus: 'Push focus', exercises: [
+        { name: 'Squat', sets: 3, reps: '8', rpe: '7' },
+        { name: 'Bench', sets: 3, reps: '8', rpe: '8' },
+        { name: 'Row', sets: 3, reps: '8', rpe: '8' },
+        { name: 'Plank', sets: 3, reps: '45s', rpe: '8' },
+      ]},
+      { name: 'Day 2', focus: 'Pull focus', exercises: [
+        { name: 'Deadlift', sets: 3, reps: '5', rpe: '8' },
+        { name: 'OHP', sets: 3, reps: '8', rpe: '8' },
+        { name: 'Pull-Up', sets: 3, reps: 'AMRAP', rpe: '9' },
+        { name: 'Hanging Leg Raise', sets: 3, reps: '10', rpe: '8' },
+      ]},
+      { name: 'Day 3', focus: 'Volume', exercises: [
+        { name: 'Front Squat', sets: 3, reps: '8', rpe: '7' },
+        { name: 'Incline Bench', sets: 3, reps: '8', rpe: '8' },
+        { name: 'Lat Pulldown', sets: 3, reps: '10', rpe: '8' },
+        { name: 'DB Curl + Tricep', sets: 3, reps: '12', rpe: '9' },
+      ]},
+    ],
+  },
+];
+
+export const sportsGuides = [
+  { id: 'boxing', title: 'Boxing', emoji: '🥊', method: '6 hafta foundation', tips: [
+    'Shadow box 15 daq kunda. Forma ustuvor.',
+    'Skipping: 3x3 daq 1 daq dam.',
+    'Footwork drillari: ladder + cone har trening.',
+    'Combinations: 1-2, 1-2-3, 1-2-3-2.',
+    'Pad work haftada 2 marta.',
+    'Sparring faqat 4-haftadan keyin.',
+  ]},
+  { id: 'calisthenics', title: 'Calisthenics', emoji: '🤸', method: 'Skill progression', tips: [
+    'Pull-Up: negative → assisted → strict → weighted.',
+    'Push-Up: incline → strict → diamond → archer → planche lean.',
+    'Dip: bench → bar → weighted → ring.',
+    'L-sit: tuck → one leg → full → V.',
+    'Muscle-up: explosive pull-up + dip.',
+    'Hafta 4 marta. Har set 1 rep failure\'dan oldin.',
+  ]},
+  { id: 'yoga', title: 'Yoga', emoji: '🧘', method: 'Flexibility + calm', tips: [
+    'Sun Salutation A x5 har ertalab.',
+    'Hafta 3 marta 30 daq yin yoga.',
+    'Hip openers (pigeon, lizard) — 1 daqiqa har tomon.',
+    'Hamstring (forward fold, downward dog).',
+    'Breathwork: 4-7-8 nafas, kuniga 5 daqiqa.',
+    'Meditation: 10 daqiqa kuniga.',
+  ]},
+  { id: 'swimming', title: 'Swimming', emoji: '🏊', method: 'Endurance + technique', tips: [
+    'Freestyle 4x50m, 1 daq dam — boshlash.',
+    'Drill: catch-up, fingertip drag, kick board.',
+    '2 hafta: 100m hech to\'xtamasdan.',
+    'Bilateral breathing (har 3 strok).',
+    '6 hafta: 1000m ketma-ket.',
+    'Hafta 3 trening.',
+  ]},
+  { id: 'running', title: 'Running', emoji: '🏃', method: 'Zone 2 base', tips: [
+    'Burun bilan nafas oling — Z2 zona.',
+    'Hafta 80% oson, 20% tezkor.',
+    'Long run sekin yetdo: oson tempda.',
+    'Strides: 6x100m haftada bir marta.',
+    'Strength 2x: squat, calf raise, single leg.',
+    'Yangi zone 2 ko\'rish: yurish bilan +5 km/hafta.',
+  ]},
+  { id: 'mma', title: 'MMA', emoji: '🥋', method: 'Striking + grappling + cardio', tips: [
+    '50% texnika, 30% kuch, 20% cardio.',
+    'BJJ haftada 2 — fundamentals.',
+    'Striking 2 — boxing/muay thai.',
+    'S&C 2 — power + zone 2.',
+    'Sparring 1 — light/medium.',
+    'Recovery: yoga + sleep prioritet.',
+  ]},
+  { id: 'cycling', title: 'Cycling', emoji: '🚴', method: 'Z2 + intervals', tips: [
+    '80% Z2 oson tempda.',
+    'Hafta 1 interval session: 4x4 daqiqa.',
+    'Long ride: 90+ daqiqa.',
+    'Cadence 80–95 rpm.',
+    'FTP test har 6 hafta.',
+    'Strength 2x kichik volumda.',
+  ]},
+  { id: 'crossfit', title: 'CrossFit', emoji: '💥', method: 'WOD + technique', tips: [
+    'Olympic lifts har 2 kun.',
+    'WOD 3–4 hafta, 1 dam.',
+    'Technique > Time.',
+    'Mobility har trening boshida.',
+    'Recovery hafta sonda.',
+    'Skills: muscle-up, double under, HSPU.',
+  ]},
+];
