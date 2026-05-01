@@ -42,7 +42,7 @@ export default function IdentityQuizPage() {
     });
     const scores: any = {};
     Object.keys(dims).forEach(k => scores[`${k}_score`] = Math.round(dims[k].sum / dims[k].n));
-    const avg = Object.values(scores).reduce((a:number,b:any)=>a+(b as number),0) / 6;
+    const avg = Object.values(scores).reduce((a, b) => (a as number) + (b as number), 0) as number / 6;
     const profile_type = avg >= 80 ? 'Apex' : avg >= 60 ? 'Disciplined' : avg >= 40 ? 'Builder' : 'Beginner';
     const sortedDims = Object.entries(scores).sort(([,a]:any,[,b]:any)=>b-a);
     const strengths = sortedDims.slice(0,2).map(([k])=>k.replace('_score','')).join(', ');
