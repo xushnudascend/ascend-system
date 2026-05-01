@@ -38,6 +38,27 @@ const baseUz = {
   todayQuote: "Bugungi iqtibos", close: "Yopish",
   beastMode: "Yirtqich rejim", normalMode: "Oddiy", recoveryMode: "Tiklanish",
   noEscape: "Qochish yo'q", focusNow: "Hozir fokus", startSession: "Sessiyani boshlash",
+  // Landing
+  landingHero1: "Ertaga o'zgaraman dedingiz.",
+  landingHero2: "Lekin o'zgarmadingiz.",
+  landingHero3: "Yana.",
+  landingSub1: "ASCEND sizni ruhlantirmaydi.",
+  landingSub2: "U motivatsiya o'rniga ishlovchi tizim quradi.",
+  landingStartNow: "Boshlash",
+  landingBegin: "Hoziroq boshla",
+  landingTagline: "Xulq-atvorni optimallashtirish tizimi",
+  landingSystemTitle: "Tizim",
+  landingFinalH: "O'ylashni bas qiling",
+  landingFinalP: "Har bir kechiktirilgan kun — eski siz g'olib bo'layotgan kun.",
+  landingFooter: "ASCEND — iroda o'rniga avtomatik intizom.",
+  pain1: "Boshlaysiz, 3 kundan keyin tashlaysiz.",
+  pain2: "Nima qilishni bilasiz. Faqat qilmaysiz.",
+  pain3: "Motivatsiya so'nadi. Tizim — yo'q.",
+  feat1Title: "Sizni ushlovchi AI", feat1Desc: "Bo'sh motivatsiya yo'q. AI mentor bahonalarni aniqlab, to'g'rilashga majbur qiladi.",
+  feat2Title: "Moslashuvchi tizim", feat2Desc: "3 kun o'tkazib yubordingizmi? Reja soddalashadi. 7 kun ketma-ket g'olibmisiz? Yuk ortadi.",
+  feat3Title: "Streak va Intizom", feat3Desc: "Davomiyligingiz, bajarilish va streak bir ballga birlashadi. Yashirish yo'q.",
+  feat4Title: "XP va Daraja", feat4Desc: "Beginner → Disciplined → Elite → Apex. Har bir bajarilgan odat XP keltiradi.",
+  feat5Title: "Failure tizimi", feat5Desc: "Odat o'tkazib yubordingiz? Streak nolga. Ball tushadi. AI nega yiqilganingizni aytadi.",
 };
 const baseEn = {
   dashboard: "Dashboard", courses: "Courses", books: "Library",
@@ -69,6 +90,26 @@ const baseEn = {
   todayQuote: "Quote of the day", close: "Close",
   beastMode: "Beast mode", normalMode: "Normal", recoveryMode: "Recovery",
   noEscape: "No escape", focusNow: "Focus now", startSession: "Start session",
+  landingHero1: "You said you'll change tomorrow.",
+  landingHero2: "You didn't.",
+  landingHero3: "Again.",
+  landingSub1: "ASCEND doesn't motivate you.",
+  landingSub2: "It builds the system that replaces motivation.",
+  landingStartNow: "Start Now",
+  landingBegin: "Begin Now",
+  landingTagline: "Behavior Optimization System",
+  landingSystemTitle: "The System",
+  landingFinalH: "Stop thinking about it",
+  landingFinalP: "Every day you delay is another day the old version of you wins.",
+  landingFooter: "ASCEND — Replace willpower with automated discipline.",
+  pain1: "You start, then quit after 3 days.",
+  pain2: "You know what to do. You just don't do it.",
+  pain3: "Motivation fades. Systems don't.",
+  feat1Title: "AI That Confronts You", feat1Desc: "No motivational fluff. Your AI mentor detects excuse patterns and forces corrections.",
+  feat2Title: "Adaptive Behavior Engine", feat2Desc: "Miss 3 days? Plan auto-simplifies. Win 7 straight? Difficulty escalates.",
+  feat3Title: "Streak & Discipline Score", feat3Desc: "Your consistency, completion rate, and streak fused into one number. No hiding.",
+  feat4Title: "XP & Rank System", feat4Desc: "Beginner → Disciplined → Elite → Apex. Every habit completed earns XP.",
+  feat5Title: "Failure System", feat5Desc: "Missed a habit? Streak resets. Score drops. AI tells you exactly why you failed.",
 };
 const baseRu = {
   dashboard: "Дашборд", courses: "Курсы", books: "Библиотека",
@@ -100,6 +141,24 @@ const baseRu = {
   todayQuote: "Цитата дня", close: "Закрыть",
   beastMode: "Зверь", normalMode: "Обычный", recoveryMode: "Восстановление",
   noEscape: "Без побега", focusNow: "Фокус сейчас", startSession: "Начать сессию",
+  landingHero1: "Вы сказали что измените завтра.",
+  landingHero2: "Не изменили.",
+  landingHero3: "Снова.",
+  landingSub1: "ASCEND не мотивирует вас.",
+  landingSub2: "Он строит систему, заменяющую мотивацию.",
+  landingStartNow: "Начать", landingBegin: "Начать сейчас",
+  landingTagline: "Система оптимизации поведения",
+  landingSystemTitle: "Система",
+  landingFinalH: "Хватит думать", landingFinalP: "Каждый день промедления — победа старой версии вас.",
+  landingFooter: "ASCEND — замените волю на автоматическую дисциплину.",
+  pain1: "Начинаете, бросаете через 3 дня.",
+  pain2: "Знаете что делать. Не делаете.",
+  pain3: "Мотивация уходит. Системы — нет.",
+  feat1Title: "AI который не жалеет", feat1Desc: "Никакой пустой мотивации. AI ловит ваши отговорки и заставляет исправляться.",
+  feat2Title: "Адаптивный движок", feat2Desc: "Пропустили 3 дня? План упрощается. 7 побед подряд? Сложность растёт.",
+  feat3Title: "Стрик и дисциплина", feat3Desc: "Постоянство, выполнение и стрик — в одном балле. Прятаться негде.",
+  feat4Title: "XP и Ранги", feat4Desc: "Beginner → Disciplined → Elite → Apex. Каждая привычка даёт XP.",
+  feat5Title: "Система провала", feat5Desc: "Пропустили? Стрик в ноль. Балл падает. AI говорит почему вы упали.",
 };
 const baseTr = {
   dashboard: "Pano", courses: "Kurslar", books: "Kütüphane",
@@ -153,7 +212,7 @@ interface I18nCtx { lang: Lang; setLang: (l: Lang) => void; t: (k: string) => st
 const I18nContext = createContext<I18nCtx | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => (localStorage.getItem("ascend_lang") as Lang) || "en");
+  const [lang, setLangState] = useState<Lang>(() => (localStorage.getItem("ascend_lang") as Lang) || "uz");
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";

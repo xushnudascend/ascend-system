@@ -2,40 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Flame, Target, Brain, Zap, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-
-const painPoints = [
-  "You start, then quit after 3 days.",
-  "You know what to do. You just don't do it.",
-  "Motivation fades. Systems don't.",
-];
-
-const systemFeatures = [
-  {
-    icon: Brain,
-    title: "AI That Confronts You",
-    desc: "No motivational fluff. Your AI mentor detects excuse patterns and forces corrections.",
-  },
-  {
-    icon: Target,
-    title: "Adaptive Behavior Engine",
-    desc: "Miss 3 days? Plan auto-simplifies. Win 7 straight? Difficulty escalates.",
-  },
-  {
-    icon: Flame,
-    title: "Streak & Discipline Score",
-    desc: "Your consistency, completion rate, and streak fused into one number. No hiding.",
-  },
-  {
-    icon: Zap,
-    title: "XP & Rank System",
-    desc: "Beginner → Disciplined → Elite → Apex. Every habit completed earns XP.",
-  },
-  {
-    icon: Shield,
-    title: "Failure System",
-    desc: "Missed a habit? Streak resets. Score drops. AI tells you exactly why you failed.",
-  },
-];
+import { useI18n, LANG_NAMES, type Lang } from "@/hooks/useI18n";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -48,21 +15,42 @@ const fadeUp = {
 
 export default function LandingPage() {
   const { user } = useAuth();
+  const { t, lang, setLang } = useI18n();
+  const painPoints = [t("pain1"), t("pain2"), t("pain3")];
+  const systemFeatures = [
+    { icon: Brain, title: t("feat1Title"), desc: t("feat1Desc") },
+    { icon: Target, title: t("feat2Title"), desc: t("feat2Desc") },
+    { icon: Flame, title: t("feat3Title"), desc: t("feat3Desc") },
+    { icon: Zap, title: t("feat4Title"), desc: t("feat4Desc") },
+    { icon: Shield, title: t("feat5Title"), desc: t("feat5Desc") },
+  ];
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       {/* Nav */}
       <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="container flex items-center justify-between h-16">
+        <div className="container flex items-center justify-between h-16 gap-3">
           <span className="font-heading text-xl font-bold tracking-tight text-foreground">
             ASCEND<span className="text-primary">.</span>
           </span>
+          <div className="flex items-center gap-2">
+            <select
+              value={lang}
+              onChange={(e) => setLang(e.target.value as Lang)}
+              className="bg-card border border-border rounded-md text-xs px-2 py-1.5 text-foreground"
+              aria-label="Language"
+            >
+              {Object.entries(LANG_NAMES).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
           <Link
             to={user ? "/dashboard" : "/auth"}
             className="px-5 py-2 rounded-lg bg-primary text-primary-foreground font-heading text-sm font-semibold hover:brightness-110 transition-all"
           >
-            {user ? "Dashboard" : "Start Now"}
+              {user ? t("dashboard") : t("landingStartNow")}
           </Link>
+          </div>
         </div>
       </nav>
 
@@ -79,7 +67,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="text-muted-foreground text-sm font-heading tracking-widest uppercase mb-8"
           >
-            Behavior Optimization System
+            {t("landingTagline")}
           </motion.p>
 
           <motion.h1
@@ -88,12 +76,11 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="font-heading text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight"
           >
-            You said you'll change{" "}
-            <span className="text-primary glow-text">tomorrow.</span>
+            <span className="text-primary glow-text">{t("landingHero1")}</span>
             <br />
-            You didn't.
+            {t("landingHero2")}
             <br />
-            <span className="text-muted-foreground">Again.</span>
+            <span className="text-muted-foreground">{t("landingHero3")}</span>
           </motion.h1>
 
           <motion.p
@@ -102,11 +89,9 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mt-8 text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed"
           >
-            ASCEND doesn't motivate you.
+            {t("landingSub1")}
             <br />
-            <span className="text-foreground font-medium">
-              It builds the system that replaces motivation.
-            </span>
+            <span className="text-foreground font-medium">{t("landingSub2")}</span>
           </motion.p>
 
           <motion.div
@@ -119,7 +104,7 @@ export default function LandingPage() {
               to="/auth"
               className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-heading text-lg font-bold glow-box hover:brightness-110 transition-all"
             >
-              Start Now
+              {t("landingStartNow")}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
@@ -158,7 +143,7 @@ export default function LandingPage() {
             transition={{ duration: 0.6 }}
             className="font-heading text-3xl md:text-4xl font-bold text-center mb-16"
           >
-            The System<span className="text-primary">.</span>
+            {t("landingSystemTitle")}<span className="text-primary">.</span>
           </motion.h2>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -191,7 +176,7 @@ export default function LandingPage() {
             transition={{ duration: 0.6 }}
             className="font-heading text-3xl md:text-4xl font-bold mb-6"
           >
-            Stop thinking about it<span className="text-primary">.</span>
+            {t("landingFinalH")}<span className="text-primary">.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -200,7 +185,7 @@ export default function LandingPage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-muted-foreground text-lg mb-10"
           >
-            Every day you delay is another day the old version of you wins.
+            {t("landingFinalP")}
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -212,7 +197,7 @@ export default function LandingPage() {
               to="/auth"
               className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-heading text-lg font-bold glow-box hover:brightness-110 transition-all"
             >
-              Begin Now
+              {t("landingBegin")}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
@@ -223,7 +208,7 @@ export default function LandingPage() {
       <footer className="py-8 border-t border-border/30">
         <div className="container text-center">
           <p className="text-muted-foreground text-sm">
-            ASCEND — Replace willpower with automated discipline.
+            {t("landingFooter")}
           </p>
         </div>
       </footer>
