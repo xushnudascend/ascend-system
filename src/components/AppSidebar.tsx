@@ -4,7 +4,8 @@ import {
   User as UserIcon, MessageCircle, Crown, UserPlus, Settings, Brain,
   Beaker, Heart, Sparkles, Shield, TrendingUp, Power, Lock, Zap,
   Activity, Clock, Target, AlertOctagon, Swords, LineChart, CalendarClock,
-  FileSignature, Search, ClipboardCheck,
+  FileSignature, Search, ClipboardCheck, Dumbbell, Apple, ClipboardList,
+  Radar, Award,
 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 
@@ -19,10 +20,20 @@ export default function AppSidebar({ onClose }: Props) {
       label: t("dashboard"),
       items: [
         { to: "/dashboard", icon: LayoutDashboard, label: t("dashboard") },
+        { to: "/war-room", icon: Swords, label: "War Room" },
+        { to: "/identity-quiz", icon: ClipboardList, label: "Identity Quiz" },
+        { to: "/life-score", icon: Radar, label: "Life Score" },
         { to: "/health", icon: Heart, label: "Health & Energy" },
         { to: "/analytics", icon: BarChart3, label: t("analytics") },
         { to: "/trajectory", icon: LineChart, label: "Trajectory" },
         { to: "/feedback", icon: ClipboardCheck, label: "Daily Feedback" },
+      ],
+    },
+    {
+      label: "Body",
+      items: [
+        { to: "/workouts", icon: Dumbbell, label: "Workouts & Sport" },
+        { to: "/nutrition", icon: Apple, label: "Nutrition" },
       ],
     },
     {
@@ -64,6 +75,7 @@ export default function AppSidebar({ onClose }: Props) {
       label: t("community"),
       items: [
         { to: "/community", icon: Users, label: t("community") },
+        { to: "/wins", icon: Award, label: "Wins Wall" },
         { to: "/buddies", icon: UserPlus, label: t("buddies") },
         { to: "/friends", icon: UserPlus, label: t("friends") },
         { to: "/leaderboard", icon: Trophy, label: t("leaderboard") },
