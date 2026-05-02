@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Heart, Moon, Zap, Activity, Droplets, Footprints, Plus } from "lucide-react";
+import { Heart, Moon, Zap, Activity, Droplets, Plus, Calculator } from "lucide-react";
 import TopBar from "@/components/TopBar";
 import DailyQuoteModal from "@/components/DailyQuoteModal";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ export default function HealthPage() {
   const { user } = useAuth();
   const [logs, setLogs] = useState<any[]>([]);
   const [form, setForm] = useState({ sleep_hours: 7, energy_level: 6, stress_level: 5, mood: "neutral", water_glasses: 4, weight_kg: "", steps: "", notes: "" });
+  const [bmi, setBmi] = useState({ height_cm: "175", weight_kg: "70", age: "25", sex: "male" as "male" | "female" });
 
   async function load() {
     if (!user) return;
@@ -36,6 +37,32 @@ export default function HealthPage() {
   }));
   const last = logs[0];
 
+  // BMI calculation with sex/age and ideal-weight delta
+  const h = Number(bmi.height_cm), w = Number(bmi.weight_kg), age = Number(bmi.age);
+  const bmiVal = h > 0 && w > 0 ? +(w / Math.pow(h / 100, 2)).toFixed(1) : 0;
+  // Devine formula for ideal body weight (with sex), then adjust slightly by age
+  const heightInches = h / 2.54;
+  const overFive = Math.max(0, heightInches - 60);
+  let idealWeight = bmi.sex === "male" ? 50 + 2.3 * overFive : 45.5 + 2.3 * overFive;
+  // gentle age adjustment: +0.1 kg per year over 25, capped at +5kg
+  if (age > 25) idealWeight += Math.min(5, (age - 25) * 0.1);
+  idealWeight = +idealWeight.toFixed(1);
+  const delta = w > 0 ? +(w - idealWeight).toFixed(1) : 0;
+  let bmiCategory = "—", bmiColor = "text-muted-foreground";
+  if (bmiVal > 0) {
+    if (bmiVal < 18.5) { bmiCategory = "Kam vazn"; bmiColor = "text-cyan-400"; }
+    else if (bmiVal < 25) { bmiCategory = "Normal"; bmiColor = "text-emerald-400"; }
+    else if (bmiVal < 30) { bmiCategory = "Ortiqcha vazn"; bmiColor = "text-amber-400"; }
+    else { bmiCategory = "Semizlik"; bmiColor = "text-rose-400"; }
+  }
+  const deltaText = w > 0
+    ? delta > 0
+      ? `${delta} kg ortiqcha`
+      : delta < 0
+        ? `${Math.abs(delta)} kg yetishmaydi`
+        : "Ideal vaznda"
+    : "—";
+
   return (
     <div className="min-h-screen bg-background">
       <TopBar /><DailyQuoteModal />
@@ -55,6 +82,46 @@ export default function HealthPage() {
             <Stat icon={<Droplets className="w-4 h-4 text-cyan-400" />} label="Suv" v={`${last.water_glasses ?? 0} stak.`} />
           </div>
         )}
+
+        {/* BMI calculator */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="font-heading text-lg font-bold mb-4 flex items-center gap-2">
+            <Calculator className="w-5 h-5 text-primary" /> BMI kalkulyatori
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Field label="Bo'y (sm)" value={bmi.height_cm} onChange={v => setBmi({ ...bmi, height_cm: v })} type="number" />
+            <Field label="Vazn (kg)" value={bmi.weight_kg} onChange={v => setBmi({ ...bmi, weight_kg: v })} type="number" />
+            <Field label="Yosh" value={bmi.age} onChange={v => setBmi({ ...bmi, age: v })} type="number" />
+            <div>
+              <label className="text-xs text-muted-foreground">Jins</label>
+              <div className="mt-1 grid grid-cols-2 gap-1">
+                <button onClick={() => setBmi({ ...bmi, sex: "male" })}
+                  className={`py-2 rounded-lg text-xs font-semibold border ${bmi.sex === "male" ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>Erkak</button>
+                <button onClick={() => setBmi({ ...bmi, sex: "female" })}
+                  className={`py-2 rounded-lg text-xs font-semibold border ${bmi.sex === "female" ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>Ayol</button>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="bg-background border border-border rounded-xl p-4 text-center">
+              <div className="text-xs text-muted-foreground">BMI</div>
+              <div className={`font-heading text-3xl font-bold ${bmiColor}`}>{bmiVal || "—"}</div>
+              <div className={`text-xs mt-1 ${bmiColor}`}>{bmiCategory}</div>
+            </div>
+            <div className="bg-background border border-border rounded-xl p-4 text-center">
+              <div className="text-xs text-muted-foreground">Ideal vazn</div>
+              <div className="font-heading text-3xl font-bold">{idealWeight > 0 ? `${idealWeight} kg` : "—"}</div>
+              <div className="text-xs mt-1 text-muted-foreground">Devine formulasi</div>
+            </div>
+            <div className="bg-background border border-border rounded-xl p-4 text-center">
+              <div className="text-xs text-muted-foreground">Farq</div>
+              <div className={`font-heading text-3xl font-bold ${delta > 0 ? "text-amber-400" : delta < 0 ? "text-cyan-400" : "text-emerald-400"}`}>
+                {w > 0 ? `${delta > 0 ? "+" : ""}${delta} kg` : "—"}
+              </div>
+              <div className="text-xs mt-1 text-muted-foreground">{deltaText}</div>
+            </div>
+          </div>
+        </div>
 
         <div className="bg-card border border-border rounded-2xl p-5">
           <div className="font-heading text-lg font-bold mb-4">Bugungi yozuv</div>
