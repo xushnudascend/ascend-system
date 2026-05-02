@@ -43,6 +43,7 @@ import DuelsPage from "./pages/DuelsPage";
 import TrajectoryPage from "./pages/TrajectoryPage";
 import AutoRoutinePage from "./pages/AutoRoutinePage";
 import ContractsPage from "./pages/ContractsPage";
+import ContractDetailPage from "./pages/ContractDetailPage";
 import RootCausePage from "./pages/RootCausePage";
 import DailyFeedbackPage from "./pages/DailyFeedbackPage";
 import WorkoutsPage from "./pages/WorkoutsPage";
@@ -100,6 +101,7 @@ const App = () => (
                 <Route path="/trajectory" element={<TrajectoryPage />} />
                 <Route path="/auto-routine" element={<AutoRoutinePage />} />
                 <Route path="/contracts" element={<ContractsPage />} />
+                <Route path="/contracts/:id" element={<ContractDetailPage />} />
                 <Route path="/root-cause" element={<RootCausePage />} />
                 <Route path="/feedback" element={<DailyFeedbackPage />} />
                 <Route path="/workouts" element={<WorkoutsPage />} />
