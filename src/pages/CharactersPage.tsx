@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ArrowLeft, Loader2, Search } from "lucide-react";
+import { Send, ArrowLeft, Loader2, Search, Trash2 } from "lucide-react";
 import TopBar from "@/components/TopBar";
 import DailyQuoteModal from "@/components/DailyQuoteModal";
 import { characters as baseChars, characterCategories, type Character } from "@/data/characters";
 import { charactersExtra } from "@/data/charactersExtra";
 import { useI18n } from "@/hooks/useI18n";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -13,6 +15,7 @@ const characters: Character[] = [...baseChars, ...charactersExtra];
 
 export default function CharactersPage() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [active, setActive] = useState<Character | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -23,6 +26,28 @@ export default function CharactersPage() {
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: 999999, behavior: "smooth" }); }, [messages]);
 
+  // Load saved chat for the active character
+  useEffect(() => {
+    if (!active || !user) { return; }
+    (async () => {
+      const { data } = await supabase
+        .from("character_chats")
+        .select("role, content")
+        .eq("user_id", user.id)
+        .eq("character_id", active.id)
+        .order("created_at", { ascending: true })
+        .limit(200);
+      setMessages((data as Msg[]) || []);
+    })();
+  }, [active, user]);
+
+  async function clearHistory() {
+    if (!active || !user) return;
+    if (!confirm("Bu shaxs bilan tarixni o'chirilsinmi?")) return;
+    await supabase.from("character_chats").delete().eq("user_id", user.id).eq("character_id", active.id);
+    setMessages([]);
+  }
+
   const list = characters.filter(c => (cat === "all" || c.category === cat) && (!q || c.name.toLowerCase().includes(q.toLowerCase())));
 
   async function send() {
@@ -30,6 +55,7 @@ export default function CharactersPage() {
     const userMsg: Msg = { role: "user", content: input };
     const next = [...messages, userMsg];
     setMessages(next); setInput(""); setLoading(true);
+    if (user) await supabase.from("character_chats").insert({ user_id: user.id, character_id: active.id, role: "user", content: userMsg.content });
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/character-mentor`;
       const resp = await fetch(url, {
@@ -60,6 +86,7 @@ export default function CharactersPage() {
           } catch { buf = line + "\n" + buf; break; }
         }
       }
+      if (user && acc.trim()) await supabase.from("character_chats").insert({ user_id: user.id, character_id: active.id, role: "assistant", content: acc });
     } catch {
       setMessages(m => [...m, { role: "assistant", content: "Xatolik yuz berdi." }]);
     } finally { setLoading(false); }
@@ -77,6 +104,10 @@ export default function CharactersPage() {
               <div className="font-semibold">{active.name}</div>
               <div className="text-xs text-muted-foreground">{active.title} · {active.era}</div>
             </div>
+            <button onClick={clearHistory} title="Tarixni tozalash"
+              className="ml-auto p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-rose-400">
+              <Trash2 className="w-4 h-4" />
+            </button>
           </div>
         </div>
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 max-w-3xl mx-auto w-full">

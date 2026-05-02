@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { FileSignature, Plus, Loader2, Check, X } from "lucide-react";
+import { FileSignature, Plus, Loader2, Check, X, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import TopBar from "@/components/TopBar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,25 +94,30 @@ export default function ContractsPage() {
             {list.map(c => {
               const ends = c.ends_at ? new Date(c.ends_at) : null;
               const expired = ends && ends.getTime() < Date.now();
+              const dayPct = Math.min(100, Math.round(((c.completed_days || 0) / c.duration_days) * 100));
               return (
                 <motion.div key={c.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-xl p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="font-semibold">{c.title}</div>
+                  <Link to={`/contracts/${c.id}`} className="flex items-start justify-between gap-3 group">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold group-hover:text-primary transition-colors">{c.title}</div>
                       <div className="text-xs text-muted-foreground mt-0.5">Proof: {c.target}</div>
-                      <div className="flex gap-3 text-[11px] text-muted-foreground mt-2">
-                        <span>{c.duration_days} days</span>
+                      <div className="flex gap-3 text-[11px] text-muted-foreground mt-2 flex-wrap">
+                        <span>{c.completed_days || 0}/{c.duration_days} kun</span>
                         <span className="text-primary">Stake: {c.stake_xp} XP</span>
                         <span className={`uppercase font-semibold ${c.status === "active" ? "text-amber-400" : c.status === "won" ? "text-emerald-400" : "text-rose-400"}`}>{c.status}</span>
                       </div>
-                    </div>
-                    {c.status === "active" && (
-                      <div className="flex gap-1">
-                        <button onClick={() => complete(c, true)} className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"><Check className="w-4 h-4" /></button>
-                        <button onClick={() => complete(c, false)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"><X className="w-4 h-4" /></button>
+                      <div className="h-1 bg-muted rounded-full mt-2 overflow-hidden">
+                        <div className="h-full bg-emerald-500" style={{ width: `${dayPct}%` }} />
                       </div>
-                    )}
-                  </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+                  </Link>
+                  {c.status === "active" && (
+                    <div className="flex gap-1 mt-3 justify-end">
+                      <button onClick={() => complete(c, true)} className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"><Check className="w-4 h-4" /></button>
+                      <button onClick={() => complete(c, false)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"><X className="w-4 h-4" /></button>
+                    </div>
+                  )}
                 </motion.div>
               );
             })}

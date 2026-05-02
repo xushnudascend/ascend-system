@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Send, Loader2, Brain, User } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Brain, User, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/hooks/useAuth";
 import { useCoachTone } from "@/hooks/useCoachTone";
@@ -96,6 +96,20 @@ export default function AIMentorPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Load saved chat history
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("mentor_chats")
+        .select("role, content")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (data && data.length) setMessages(data as Msg[]);
+    })();
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -110,6 +124,13 @@ export default function AIMentorPage() {
     })();
   }, [user]);
 
+  async function clearHistory() {
+    if (!user) return;
+    if (!confirm("Butun tarixni o'chirilsinmi?")) return;
+    await supabase.from("mentor_chats").delete().eq("user_id", user.id);
+    setMessages([]);
+  }
+
   const send = async (text: string) => {
     if (!text.trim() || isLoading) return;
     const userMsg: Msg = { role: "user", content: text.trim() };
@@ -117,6 +138,7 @@ export default function AIMentorPage() {
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
+    if (user) await supabase.from("mentor_chats").insert({ user_id: user.id, role: "user", content: userMsg.content });
 
     let assistantSoFar = "";
     const upsertAssistant = (chunk: string) => {
@@ -135,7 +157,12 @@ export default function AIMentorPage() {
       tone,
       context: ctx,
       onDelta: upsertAssistant,
-      onDone: () => setIsLoading(false),
+      onDone: async () => {
+        setIsLoading(false);
+        if (user && assistantSoFar.trim()) {
+          await supabase.from("mentor_chats").insert({ user_id: user.id, role: "assistant", content: assistantSoFar });
+        }
+      },
       onError: (msg) => {
         setMessages((prev) => [...prev, { role: "assistant", content: `⚠️ ${msg}` }]);
         setIsLoading(false);
@@ -155,7 +182,9 @@ export default function AIMentorPage() {
             <Brain className="w-5 h-5 text-primary" />
             <span className="font-heading font-bold">AI Mentor</span>
           </div>
-          <div className="w-16" />
+          <button onClick={clearHistory} className="text-xs text-muted-foreground hover:text-rose-400 flex items-center gap-1" title="Tarixni tozalash">
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </nav>
 

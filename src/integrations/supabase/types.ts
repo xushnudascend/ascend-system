@@ -89,6 +89,33 @@ export type Database = {
         }
         Relationships: []
       }
+      character_chats: {
+        Row: {
+          character_id: string
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          character_id: string
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          character_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -606,6 +633,30 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_chats: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -731,6 +782,54 @@ export type Database = {
           log_date?: string
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      personalized_plans: {
+        Row: {
+          created_at: string
+          daily_routine: Json
+          id: string
+          profile_type: string | null
+          recommended_habits: Json
+          scores: Json
+          strengths: string | null
+          summary: string | null
+          thirty_day_roadmap: Json
+          user_id: string
+          warnings: string | null
+          weaknesses: string | null
+          weekly_plan: Json
+        }
+        Insert: {
+          created_at?: string
+          daily_routine?: Json
+          id?: string
+          profile_type?: string | null
+          recommended_habits?: Json
+          scores?: Json
+          strengths?: string | null
+          summary?: string | null
+          thirty_day_roadmap?: Json
+          user_id: string
+          warnings?: string | null
+          weaknesses?: string | null
+          weekly_plan?: Json
+        }
+        Update: {
+          created_at?: string
+          daily_routine?: Json
+          id?: string
+          profile_type?: string | null
+          recommended_habits?: Json
+          scores?: Json
+          strengths?: string | null
+          summary?: string | null
+          thirty_day_roadmap?: Json
+          user_id?: string
+          warnings?: string | null
+          weaknesses?: string | null
+          weekly_plan?: Json
         }
         Relationships: []
       }
@@ -876,7 +975,9 @@ export type Database = {
           category: string | null
           cause: string
           created_at: string
+          fail_id: string | null
           failure: string
+          habit_fix: string | null
           id: string
           user_id: string
         }
@@ -884,7 +985,9 @@ export type Database = {
           category?: string | null
           cause: string
           created_at?: string
+          fail_id?: string | null
           failure: string
+          habit_fix?: string | null
           id?: string
           user_id: string
         }
@@ -892,7 +995,9 @@ export type Database = {
           category?: string | null
           cause?: string
           created_at?: string
+          fail_id?: string | null
           failure?: string
+          habit_fix?: string | null
           id?: string
           user_id?: string
         }
