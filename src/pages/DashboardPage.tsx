@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import TopBar from "@/components/TopBar";
 import TimeLeakWidget from "@/components/TimeLeakWidget";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Habit {
   id: string;
@@ -51,6 +52,7 @@ const seedHabits = [
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [habits, setHabits] = useState<Habit[]>([]);
