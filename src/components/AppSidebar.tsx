@@ -2,8 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, Library, BarChart3, Users, Trophy,
   User as UserIcon, MessageCircle, Crown, UserPlus, Settings, Brain,
-  Heart, Sparkles, Power, Lock, Zap,
-  Activity, Clock, Target, AlertOctagon, Swords, LineChart, CalendarClock,
+  Heart, Sparkles, Power, Lock, Zap, Beaker,
+  Clock, Target, AlertOctagon, Swords, LineChart, CalendarClock,
   FileSignature, Search, ClipboardCheck, Dumbbell, Apple, ClipboardList,
   Radar, Award, ShieldCheck,
 } from "lucide-react";
