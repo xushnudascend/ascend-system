@@ -59,6 +59,15 @@ const baseUz = {
   feat3Title: "Streak va Intizom", feat3Desc: "Davomiyligingiz, bajarilish va streak bir ballga birlashadi. Yashirish yo'q.",
   feat4Title: "XP va Daraja", feat4Desc: "Beginner → Disciplined → Elite → Apex. Har bir bajarilgan odat XP keltiradi.",
   feat5Title: "Failure tizimi", feat5Desc: "Odat o'tkazib yubordingiz? Streak nolga. Ball tushadi. AI nega yiqilganingizni aytadi.",
+  // Courses
+  coursesSubtitle: "har biri kunlik vazifalar bilan",
+  searchCourse: "Kurs qidirish...",
+  catAll: "Hammasi", catDiscipline: "Intizom", catMindset: "Tafakkur",
+  catFitness: "Fitness", catFinance: "Pul", catProductivity: "Samaradorlik",
+  catRelationships: "Munosabatlar", catLearning: "O'rganish",
+  catSpirituality: "Ma'naviyat", catLeadership: "Liderlik", catCreativity: "Ijodkorlik",
+  back: "Orqaga", dayWord: "kun", completed: "bajarildi",
+  admin: "Admin",
 };
 const baseEn = {
   dashboard: "Dashboard", courses: "Courses", books: "Library",
@@ -110,6 +119,14 @@ const baseEn = {
   feat3Title: "Streak & Discipline Score", feat3Desc: "Your consistency, completion rate, and streak fused into one number. No hiding.",
   feat4Title: "XP & Rank System", feat4Desc: "Beginner → Disciplined → Elite → Apex. Every habit completed earns XP.",
   feat5Title: "Failure System", feat5Desc: "Missed a habit? Streak resets. Score drops. AI tells you exactly why you failed.",
+  coursesSubtitle: "each with daily tasks",
+  searchCourse: "Search course...",
+  catAll: "All", catDiscipline: "Discipline", catMindset: "Mindset",
+  catFitness: "Fitness", catFinance: "Money", catProductivity: "Productivity",
+  catRelationships: "Relationships", catLearning: "Learning",
+  catSpirituality: "Spirituality", catLeadership: "Leadership", catCreativity: "Creativity",
+  back: "Back", dayWord: "day", completed: "done",
+  admin: "Admin",
 };
 const baseRu = {
   dashboard: "Дашборд", courses: "Курсы", books: "Библиотека",
@@ -159,6 +176,14 @@ const baseRu = {
   feat3Title: "Стрик и дисциплина", feat3Desc: "Постоянство, выполнение и стрик — в одном балле. Прятаться негде.",
   feat4Title: "XP и Ранги", feat4Desc: "Beginner → Disciplined → Elite → Apex. Каждая привычка даёт XP.",
   feat5Title: "Система провала", feat5Desc: "Пропустили? Стрик в ноль. Балл падает. AI говорит почему вы упали.",
+  coursesSubtitle: "каждый с ежедневными задачами",
+  searchCourse: "Поиск курса...",
+  catAll: "Все", catDiscipline: "Дисциплина", catMindset: "Мышление",
+  catFitness: "Фитнес", catFinance: "Деньги", catProductivity: "Продуктивность",
+  catRelationships: "Отношения", catLearning: "Обучение",
+  catSpirituality: "Духовность", catLeadership: "Лидерство", catCreativity: "Творчество",
+  back: "Назад", dayWord: "дн", completed: "сделано",
+  admin: "Админ",
 };
 const baseTr = {
   dashboard: "Pano", courses: "Kurslar", books: "Kütüphane",
