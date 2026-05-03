@@ -5,10 +5,12 @@ import TopBar from "@/components/TopBar";
 import DailyQuoteModal from "@/components/DailyQuoteModal";
 import { courses as baseCourses, courseCategories, type Course } from "@/data/courses";
 import { coursesExtra } from "@/data/coursesExtra";
+import { useI18n } from "@/hooks/useI18n";
 
 const courses: Course[] = [...baseCourses, ...coursesExtra];
 
 export default function CoursesPage() {
+  const { t } = useI18n();
   const [cat, setCat] = useState("all");
   const [q, setQ] = useState("");
   const [active, setActive] = useState<Course | null>(null);
@@ -36,7 +38,7 @@ export default function CoursesPage() {
         <TopBar />
         <div className="max-w-3xl mx-auto px-4 py-6">
           <button onClick={() => setActive(null)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 text-sm">
-            <ArrowLeft className="w-4 h-4" /> Orqaga
+            <ArrowLeft className="w-4 h-4" /> {t("back")}
           </button>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-center gap-3 mb-2">
@@ -47,9 +49,9 @@ export default function CoursesPage() {
               </div>
             </div>
             <div className="flex gap-3 mt-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {active.duration} kun</span>
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {active.duration} {t("dayWord")}</span>
               <span className="flex items-center gap-1"><BarChart className="w-3 h-3" /> {active.level}</span>
-              <span className="text-primary">{pct}% bajarildi</span>
+              <span className="text-primary">{pct}% {t("completed")}</span>
             </div>
             <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} className="h-full bg-primary" />
@@ -65,7 +67,7 @@ export default function CoursesPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="font-semibold text-sm">Kun {l.day}: {l.title}</div>
+                          <div className="font-semibold text-sm">{t("dayWord")} {l.day}: {l.title}</div>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">{l.task}</p>
                         <p className="text-[10px] text-primary mt-1">💡 {l.tip}</p>
@@ -87,20 +89,20 @@ export default function CoursesPage() {
       <DailyQuoteModal />
       <main className="max-w-6xl mx-auto px-4 py-6">
         <header className="mb-5">
-          <h1 className="font-heading text-3xl font-bold">Kurslar</h1>
-          <p className="text-muted-foreground text-sm mt-1">{courses.length}+ kurs · har biri kunlik vazifalar bilan</p>
+          <h1 className="font-heading text-3xl font-bold">{t("courses")}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{courses.length}+ · {t("coursesSubtitle")}</p>
         </header>
 
         <div className="relative mb-4">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Kurs qidirish..." className="w-full bg-card border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none focus:border-primary" />
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder={t("searchCourse")} className="w-full bg-card border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none focus:border-primary" />
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide">
           {courseCategories.map(c => (
             <button key={c.id} onClick={() => setCat(c.id)}
               className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1 ${cat === c.id ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"}`}>
-              <span>{c.emoji}</span> {c.label}
+              <span>{c.emoji}</span> {t(c.tKey)}
             </button>
           ))}
         </div>
@@ -119,7 +121,7 @@ export default function CoursesPage() {
                 <div className="font-heading font-bold text-sm">{c.title}</div>
                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{c.description}</p>
                 <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>{c.duration} kun</span>
+                  <span>{c.duration} {t("dayWord")}</span>
                   <span>{pct}%</span>
                 </div>
                 <div className="mt-1 h-1 bg-muted rounded-full overflow-hidden">
