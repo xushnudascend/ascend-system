@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.is_conv_participant(uuid, uuid) FROM PUBLIC, anon, authenticated;
