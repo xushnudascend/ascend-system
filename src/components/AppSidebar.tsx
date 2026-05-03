@@ -2,18 +2,28 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, Library, BarChart3, Users, Trophy,
   User as UserIcon, MessageCircle, Crown, UserPlus, Settings, Brain,
-  Beaker, Heart, Sparkles, Shield, TrendingUp, Power, Lock, Zap,
-  Activity, Clock, Target, AlertOctagon, Swords, LineChart, CalendarClock,
+  Heart, Sparkles, Power, Lock, Zap, Beaker,
+  Clock, Target, AlertOctagon, Swords, LineChart, CalendarClock,
   FileSignature, Search, ClipboardCheck, Dumbbell, Apple, ClipboardList,
-  Radar, Award,
+  Radar, Award, ShieldCheck,
 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Props { onClose?: () => void }
 
 export default function AppSidebar({ onClose }: Props) {
   const { t } = useI18n();
   const loc = useLocation();
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role","admin").maybeSingle()
+      .then(({ data }) => setIsAdmin(!!data));
+  }, [user]);
 
   const groups: { label: string; items: { to: string; icon: any; label: string }[] }[] = [
     {
@@ -41,14 +51,10 @@ export default function AppSidebar({ onClose }: Props) {
       items: [
         { to: "/decision-hub", icon: Brain, label: t("decisionEngine") },
         { to: "/command", icon: Power, label: "Command" },
-        { to: "/auto-routine", icon: CalendarClock, label: "Auto Routine" },
         { to: "/focus", icon: Lock, label: "Focus Lock" },
         { to: "/contracts", icon: FileSignature, label: "Contracts" },
         { to: "/root-cause", icon: Search, label: "Root Cause" },
         { to: "/drills", icon: Zap, label: "Drills" },
-        { to: "/identity", icon: Shield, label: "Identity" },
-        { to: "/simulation", icon: TrendingUp, label: "Simulation" },
-        { to: "/lab", icon: Beaker, label: "Lab" },
       ],
     },
     {
@@ -56,7 +62,6 @@ export default function AppSidebar({ onClose }: Props) {
       items: [
         { to: "/time-leak", icon: Clock, label: "Time Leak" },
         { to: "/outputs", icon: Target, label: "Outputs" },
-        { to: "/excuses", icon: Activity, label: "Excuses" },
         { to: "/fail-log", icon: AlertOctagon, label: "Fail Log" },
         { to: "/duels", icon: Swords, label: "Duels" },
       ],
@@ -77,7 +82,6 @@ export default function AppSidebar({ onClose }: Props) {
         { to: "/community", icon: Users, label: t("community") },
         { to: "/wins", icon: Award, label: "Wins Wall" },
         { to: "/buddies", icon: UserPlus, label: t("buddies") },
-        { to: "/friends", icon: UserPlus, label: t("friends") },
         { to: "/leaderboard", icon: Trophy, label: t("leaderboard") },
         { to: "/ai-mentor", icon: MessageCircle, label: t("aiMentor") },
       ],
@@ -88,6 +92,7 @@ export default function AppSidebar({ onClose }: Props) {
         { to: "/profile", icon: UserIcon, label: t("profile") },
         { to: "/pricing", icon: Crown, label: t("pricing") },
         { to: "/settings", icon: Settings, label: t("settings") },
+        ...(isAdmin ? [{ to: "/admin", icon: ShieldCheck, label: t("admin") }] : []),
       ],
     },
   ];

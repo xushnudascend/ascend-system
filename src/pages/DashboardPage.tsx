@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import TopBar from "@/components/TopBar";
 import TimeLeakWidget from "@/components/TimeLeakWidget";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Habit {
   id: string;
@@ -51,6 +52,7 @@ const seedHabits = [
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -295,8 +297,8 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">{cat.emoji}</span>
                   </div>
-                  <h3 className="font-heading font-semibold text-sm">{cat.label}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Kurslar</p>
+                  <h3 className="font-heading font-semibold text-sm">{t(cat.tKey)}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{t("courses")}</p>
                 </Link>
               </motion.div>
             ))}
