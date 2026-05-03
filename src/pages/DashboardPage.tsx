@@ -295,8 +295,8 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">{cat.emoji}</span>
                   </div>
-                  <h3 className="font-heading font-semibold text-sm">{cat.label}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Kurslar</p>
+                  <h3 className="font-heading font-semibold text-sm">{t(cat.tKey)}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{t("courses")}</p>
                 </Link>
               </motion.div>
             ))}
