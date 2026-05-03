@@ -257,16 +257,16 @@ export const courses: Course[] = [
     Array.from({length:30},(_,i)=>({day:i+1,title:`Kun ${i+1}`,task:'10 ta foto + bittasini tahlil qiling.',tip:'See > shoot'}))),
 ];
 
-export const courseCategories = [
-  { id: 'all', label: 'Hammasi', emoji: '🌍' },
-  { id: 'discipline', label: 'Intizom', emoji: '🛡️' },
-  { id: 'mindset', label: 'Tafakkur', emoji: '🧠' },
-  { id: 'fitness', label: 'Fitness', emoji: '💪' },
-  { id: 'finance', label: 'Pul', emoji: '💰' },
-  { id: 'productivity', label: 'Samaradorlik', emoji: '⚡' },
-  { id: 'relationships', label: 'Munosabatlar', emoji: '💬' },
-  { id: 'learning', label: 'O\'rganish', emoji: '🎓' },
-  { id: 'spirituality', label: 'Ma\'naviyat', emoji: '🕊️' },
-  { id: 'leadership', label: 'Liderlik', emoji: '👑' },
-  { id: 'creativity', label: 'Ijodkorlik', emoji: '🎨' },
+export const courseCategories: { id: string; tKey: string; emoji: string }[] = [
+  { id: 'all', tKey: 'catAll', emoji: '🌍' },
+  { id: 'discipline', tKey: 'catDiscipline', emoji: '🛡️' },
+  { id: 'mindset', tKey: 'catMindset', emoji: '🧠' },
+  { id: 'fitness', tKey: 'catFitness', emoji: '💪' },
+  { id: 'finance', tKey: 'catFinance', emoji: '💰' },
+  { id: 'productivity', tKey: 'catProductivity', emoji: '⚡' },
+  { id: 'relationships', tKey: 'catRelationships', emoji: '💬' },
+  { id: 'learning', tKey: 'catLearning', emoji: '🎓' },
+  { id: 'spirituality', tKey: 'catSpirituality', emoji: '🕊️' },
+  { id: 'leadership', tKey: 'catLeadership', emoji: '👑' },
+  { id: 'creativity', tKey: 'catCreativity', emoji: '🎨' },
 ];
