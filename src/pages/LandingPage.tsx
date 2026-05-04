@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Flame, Target, Brain, Zap, Shield } from "lucide-react";
+import { ArrowRight, Flame, Target, Brain, Zap, Shield, Sparkles, ListChecks, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n, LANG_NAMES, type Lang } from "@/hooks/useI18n";
@@ -24,6 +24,12 @@ export default function LandingPage() {
     { icon: Zap, title: t("feat4Title"), desc: t("feat4Desc") },
     { icon: Shield, title: t("feat5Title"), desc: t("feat5Desc") },
   ];
+  const steps = [
+    { icon: Sparkles, title: t("landingStep1T"), desc: t("landingStep1D") },
+    { icon: ListChecks, title: t("landingStep2T"), desc: t("landingStep2D") },
+    { icon: TrendingUp, title: t("landingStep3T"), desc: t("landingStep3D") },
+  ];
+  const proof = [t("landingProof1"), t("landingProof2"), t("landingProof3"), t("landingProof4")];
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -112,7 +118,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pain Points */}
-      <section className="py-20 border-t border-border/30">
+      <section className="py-16 border-t border-border/30">
         <div className="container max-w-2xl mx-auto px-4">
           <div className="space-y-6">
             {painPoints.map((point, i) => (
@@ -130,6 +136,40 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-16 border-t border-border/30">
+        <div className="container max-w-5xl mx-auto px-4">
+          <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-12">
+            {t("landingHowTitle")}<span className="text-primary">.</span>
+          </h2>
+          <div className="grid md:grid-cols-3 gap-5">
+            {steps.map((s, i) => (
+              <motion.div key={i} custom={i} initial="hidden" whileInView="visible"
+                viewport={{ once: true, margin: "-30px" }} variants={fadeUp}
+                className="p-6 rounded-xl border border-primary/20 bg-card/80 card-hover">
+                <s.icon className="w-8 h-8 text-primary mb-4" />
+                <h3 className="font-heading text-lg font-semibold mb-2">{s.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{s.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Social proof / stats */}
+      <section className="py-16 border-t border-border/30">
+        <div className="container max-w-5xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {proof.map((p, i) => (
+              <div key={i} className="text-center p-6 rounded-xl border border-border/50 bg-card/50">
+                <div className="font-heading text-2xl md:text-3xl font-bold text-primary glow-text">{p}</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-muted-foreground mt-8 text-base md:text-lg">{t("landingTrust")}</p>
         </div>
       </section>
 
