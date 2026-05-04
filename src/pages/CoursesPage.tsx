@@ -7,7 +7,23 @@ import { courses as baseCourses, courseCategories, type Course } from "@/data/co
 import { coursesExtra } from "@/data/coursesExtra";
 import { useI18n } from "@/hooks/useI18n";
 
-const courses: Course[] = [...baseCourses, ...coursesExtra];
+const allCourses: Course[] = [...baseCourses, ...coursesExtra];
+
+// Interleave by category so the "all" view doesn't look like a single category
+function interleaveByCategory(list: Course[]): Course[] {
+  const buckets = new Map<string, Course[]>();
+  list.forEach(c => {
+    if (!buckets.has(c.category)) buckets.set(c.category, []);
+    buckets.get(c.category)!.push(c);
+  });
+  const queues = Array.from(buckets.values());
+  const out: Course[] = [];
+  while (queues.some(q => q.length)) {
+    queues.forEach(q => { if (q.length) out.push(q.shift()!); });
+  }
+  return out;
+}
+const coursesAll = interleaveByCategory(allCourses);
 
 export default function CoursesPage() {
   const { t } = useI18n();
@@ -28,7 +44,8 @@ export default function CoursesPage() {
     });
   }
 
-  const list = courses.filter(c => (cat === "all" || c.category === cat) && (!q || c.title.toLowerCase().includes(q.toLowerCase()) || c.description.toLowerCase().includes(q.toLowerCase())));
+  const source = cat === "all" ? coursesAll : allCourses.filter(c => c.category === cat);
+  const list = source.filter(c => !q || c.title.toLowerCase().includes(q.toLowerCase()) || c.description.toLowerCase().includes(q.toLowerCase()));
 
   if (active) {
     const done = doneDays[active.id] || [];
@@ -90,7 +107,7 @@ export default function CoursesPage() {
       <main className="max-w-6xl mx-auto px-4 py-6">
         <header className="mb-5">
           <h1 className="font-heading text-3xl font-bold">{t("courses")}</h1>
-          <p className="text-muted-foreground text-sm mt-1">{courses.length}+ · {t("coursesSubtitle")}</p>
+          <p className="text-muted-foreground text-sm mt-1">{allCourses.length}+ · {t("coursesSubtitle")}</p>
         </header>
 
         <div className="relative mb-4">
@@ -100,19 +117,21 @@ export default function CoursesPage() {
 
         <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide">
           {courseCategories.map(c => (
-            <button key={c.id} onClick={() => setCat(c.id)}
+            <button key={c.id} onClick={() => { setCat(c.id); window.scrollTo({ top: 0, behavior: "smooth" }); }}
               className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1 ${cat === c.id ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"}`}>
               <span>{c.emoji}</span> {t(c.tKey)}
             </button>
           ))}
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div key={cat} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {list.map(c => {
             const done = (doneDays[c.id] || []).length;
             const pct = Math.round((done / c.lessons.length) * 100);
             return (
-              <motion.button key={c.id} whileHover={{ y: -3, scale: 1.01 }} onClick={() => setActive(c)}
+              <motion.button key={c.id}
+                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -3, scale: 1.01 }} onClick={() => setActive(c)}
                 className="text-left bg-card border border-border rounded-xl p-4 hover:border-primary/40 transition-colors">
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-3xl">{c.emoji}</div>
@@ -131,6 +150,12 @@ export default function CoursesPage() {
             );
           })}
         </div>
+
+        {list.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground text-sm">
+            {t("noResults") || "Hech narsa topilmadi"}
+          </div>
+        )}
       </main>
     </div>
   );
