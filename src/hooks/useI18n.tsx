@@ -68,6 +68,20 @@ const baseUz = {
   catSpirituality: "Ma'naviyat", catLeadership: "Liderlik", catCreativity: "Ijodkorlik",
   back: "Orqaga", dayWord: "kun", completed: "bajarildi",
   admin: "Admin",
+  // Landing v2
+  landingHowTitle: "Qanday ishlaydi",
+  landingStep1T: "1. Identity Quiz",
+  landingStep1D: "15 savol — sizning shaxsiy 30 kunlik yo'lingizni AI quradi.",
+  landingStep2T: "2. Kunlik tizim",
+  landingStep2D: "Odatlar, fokus va shartnomalar — har kuni avtomatik.",
+  landingStep3T: "3. Real natija",
+  landingStep3D: "XP, streak va Life Score — yiqilsangiz AI sababini topadi.",
+  landingProofTitle: "Raqamlar",
+  landingProof1: "100+ kurs",
+  landingProof2: "100+ shaxs",
+  landingProof3: "12 til",
+  landingProof4: "0 bahona",
+  landingTrust: "Iroda emas — tizim. Bahonalar emas — natija.",
 };
 const baseEn = {
   dashboard: "Dashboard", courses: "Courses", books: "Library",
