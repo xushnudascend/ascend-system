@@ -62,6 +62,8 @@ export default function DashboardPage() {
   const [showAddHabit, setShowAddHabit] = useState(false);
   const [bmiWeight, setBmiWeight] = useState("");
   const [bmiHeight, setBmiHeight] = useState("");
+  const [bmiAge, setBmiAge] = useState("");
+  const [bmiSex, setBmiSex] = useState<"m" | "f">("m");
   const [weekData, setWeekData] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
 
   useEffect(() => {
@@ -160,7 +162,14 @@ export default function DashboardPage() {
     setHabits(prev => prev.filter(h => h.id !== id));
   };
 
-  const bmi = bmiWeight && bmiHeight ? (Number(bmiWeight) / ((Number(bmiHeight) / 100) ** 2)).toFixed(1) : null;
+  const w = Number(bmiWeight);
+  const hM = Number(bmiHeight) / 100;
+  const bmi = bmiWeight && bmiHeight && hM > 0 ? (w / (hM * hM)).toFixed(1) : null;
+  // Ideal weight: BMI 22 midpoint, slight sex adjustment
+  const idealMid = bmi ? (22 * hM * hM) * (bmiSex === "f" ? 0.97 : 1) : 0;
+  const idealLow = bmi ? 18.5 * hM * hM : 0;
+  const idealHigh = bmi ? 24.9 * hM * hM : 0;
+  const diff = bmi ? +(w - idealMid).toFixed(1) : 0;
   const bmiCategory = bmi ? (Number(bmi) < 18.5 ? "Kam vazn" : Number(bmi) < 25 ? "Normal" : Number(bmi) < 30 ? "Ortiqcha vazn" : "Semizlik") : null;
   const bmiColor = bmiCategory === "Normal" ? "text-success" : bmiCategory === "Kam vazn" || bmiCategory === "Ortiqcha vazn" ? "text-warning" : "text-destructive";
 
@@ -259,12 +268,49 @@ export default function DashboardPage() {
               <input value={bmiHeight} onChange={e => setBmiHeight(e.target.value)} type="number" placeholder="175"
                 className="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
             </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Yosh</label>
+              <input value={bmiAge} onChange={e => setBmiAge(e.target.value)} type="number" placeholder="25"
+                className="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Jins</label>
+              <div className="flex gap-2 mt-1">
+                <button type="button" onClick={() => setBmiSex("m")}
+                  className={`flex-1 py-2 rounded-lg border text-sm transition-colors ${bmiSex === "m" ? "border-primary bg-primary/10 text-primary font-medium" : "border-border text-muted-foreground"}`}>♂ Erkak</button>
+                <button type="button" onClick={() => setBmiSex("f")}
+                  className={`flex-1 py-2 rounded-lg border text-sm transition-colors ${bmiSex === "f" ? "border-primary bg-primary/10 text-primary font-medium" : "border-border text-muted-foreground"}`}>♀ Ayol</button>
+              </div>
+            </div>
           </div>
           {bmi && (
-            <div className="mt-4 p-4 rounded-xl bg-background border border-border text-center">
-              <p className="text-sm text-muted-foreground">Sizning BMI</p>
-              <p className={`font-heading text-3xl font-bold ${bmiColor}`}>{bmi}</p>
-              <p className={`text-sm font-medium ${bmiColor}`}>{bmiCategory}</p>
+            <div className="mt-4 p-4 rounded-xl bg-background border border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Sizning BMI</p>
+                  <p className={`font-heading text-3xl font-bold ${bmiColor}`}>{bmi}</p>
+                  <p className={`text-sm font-medium ${bmiColor}`}>{bmiCategory}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Ideal vazn</p>
+                  <p className="font-heading text-lg font-bold">{idealLow.toFixed(0)}–{idealHigh.toFixed(0)} kg</p>
+                  {diff === 0 ? (
+                    <p className="text-xs text-success">✓ Normal</p>
+                  ) : diff > 0 ? (
+                    <p className="text-xs text-warning">+{diff} kg ortiqcha</p>
+                  ) : (
+                    <p className="text-xs text-warning">{Math.abs(diff)} kg yetishmaydi</p>
+                  )}
+                </div>
+              </div>
+              {/* BMI scale bar */}
+              <div className="relative h-2 rounded-full bg-gradient-to-r from-warning via-success to-destructive overflow-hidden">
+                <div className="absolute top-1/2 -translate-y-1/2 w-1 h-4 bg-foreground rounded"
+                  style={{ left: `${Math.min(95, Math.max(2, ((Number(bmi) - 15) / 25) * 100))}%` }} />
+              </div>
+              <div className="flex justify-between text-[10px] text-muted-foreground">
+                <span>15</span><span>18.5</span><span>25</span><span>30</span><span>40</span>
+              </div>
             </div>
           )}
         </motion.div>
