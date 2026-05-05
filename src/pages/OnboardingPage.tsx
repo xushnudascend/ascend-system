@@ -3,25 +3,66 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { questions, calculateResults, type TestResult } from "@/data/onboardingQuestions";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, Zap, Brain, Dumbbell, Shield, Trophy } from "lucide-react";
+import { ArrowRight, Zap, Brain, Dumbbell, Shield, Trophy, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [mode, setMode] = useState<'choice' | 'test' | 'result'>('choice');
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [profileData, setProfileData] = useState<{ age?: number; height?: number; weight?: number; sex?: 'm'|'f'; badHabits: string[] }>({ badHabits: [] });
+  const [numInput, setNumInput] = useState("");
+  const [multiSel, setMultiSel] = useState<string[]>([]);
   const [result, setResult] = useState<TestResult | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const handleAnswer = (score: number) => {
     const newAnswers = { ...answers, [questions[current].id]: score };
     setAnswers(newAnswers);
+    advance(newAnswers, profileData);
+  };
+
+  const advance = (newAnswers: Record<number, number>, pd: typeof profileData) => {
     if (current < questions.length - 1) {
       setCurrent(current + 1);
+      setNumInput("");
+      setMultiSel([]);
     } else {
-      const res = calculateResults(newAnswers);
+      const res = calculateResults(newAnswers, { ...pd });
       setResult(res);
       setMode('result');
     }
+  };
+
+  const handleNumberSubmit = () => {
+    const v = Number(numInput);
+    if (!v || v <= 0) return;
+    const q = questions[current];
+    const next = { ...profileData };
+    if (q.id === 16) next.age = v;
+    if (q.id === 17) next.height = v;
+    if (q.id === 18) next.weight = v;
+    setProfileData(next);
+    advance(answers, next);
+  };
+
+  const handleSexPick = (val: string) => {
+    const next = { ...profileData, sex: val as 'm'|'f' };
+    setProfileData(next);
+    advance(answers, next);
+  };
+
+  const handleMultiSubmit = () => {
+    const next = { ...profileData, badHabits: multiSel };
+    setProfileData(next);
+    advance(answers, next);
+  };
+
+  const toggleMulti = (v: string) => {
+    setMultiSel(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   };
 
   const handleQuickStart = () => {
@@ -32,8 +73,23 @@ export default function OnboardingPage() {
     navigate('/dashboard');
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (result) localStorage.setItem('ascend_profile', JSON.stringify(result));
+    if (user && result?.recommendedHabits?.length) {
+      setSaving(true);
+      // Clear existing default seed habits and insert personalized ones
+      const habitsToInsert = result.recommendedHabits.map(h => ({
+        user_id: user.id, name: h.name, difficulty: h.difficulty, xp_reward: h.xp_reward,
+      }));
+      await supabase.from("habits").insert(habitsToInsert);
+      // Save profile data
+      if (result.weightKg || result.heightCm) {
+        await supabase.from("health_logs").insert({
+          user_id: user.id, weight_kg: result.weightKg, notes: `Sex: ${result.sex}, Age: ${result.age}, BMI: ${result.bmi}`,
+        });
+      }
+      setSaving(false);
+    }
     navigate('/dashboard');
   };
 
@@ -71,9 +127,9 @@ export default function OnboardingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-heading text-lg font-semibold flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-primary" /> 15 ta test
+                  <Brain className="w-5 h-5 text-primary" /> 20 ta test
                 </h3>
-                <p className="text-muted-foreground text-sm mt-1">Shaxsiylashtirilgan reja oling (3-5 daqiqa)</p>
+                <p className="text-muted-foreground text-sm mt-1">Shaxsiy reja + vazifalar (4-6 daqiqa)</p>
               </div>
               <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
@@ -86,7 +142,7 @@ export default function OnboardingPage() {
   if (mode === 'result' && result) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg">
           <div className="rounded-2xl border border-border bg-card p-8 glow-border">
             <div className="text-center mb-8">
               <Trophy className="w-12 h-12 text-primary mx-auto mb-4" />
@@ -110,11 +166,33 @@ export default function OnboardingPage() {
             <div className="space-y-3 mb-8 text-sm">
               <div className="flex justify-between"><span className="text-muted-foreground">Addiction darajasi:</span><span className="font-medium">{result.addictionLevel === 'low' ? 'Past' : result.addictionLevel === 'mid' ? "O'rta" : 'Yuqori'}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Energiya:</span><span className="font-medium">{result.energyLevel === 'low' ? 'Past' : result.energyLevel === 'mid' ? "O'rta" : 'Yuqori'}</span></div>
+              {result.bmi && (
+                <div className="flex justify-between"><span className="text-muted-foreground">BMI:</span><span className="font-medium">{result.bmi} ({result.bmiCategory})</span></div>
+              )}
             </div>
 
-            <button onClick={handleFinish}
+            {result.recommendedHabits && result.recommendedHabits.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-heading text-sm font-bold mb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" /> Sizga moslashtirilgan vazifalar
+                </h3>
+                <div className="space-y-2">
+                  {result.recommendedHabits.map((h, i) => (
+                    <div key={i} className="p-3 rounded-lg border border-border bg-background/50 flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{h.name}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">{h.reason}</p>
+                      </div>
+                      <span className="text-xs text-xp shrink-0">+{h.xp_reward}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button onClick={handleFinish} disabled={saving}
               className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-heading font-bold glow-box hover:brightness-110 transition-all flex items-center justify-center gap-2">
-              Dashboardga o'tish <ArrowRight className="w-5 h-5" />
+              {saving ? "Saqlanmoqda..." : <>Dashboardga o'tish <ArrowRight className="w-5 h-5" /></>}
             </button>
           </div>
         </motion.div>
@@ -139,14 +217,57 @@ export default function OnboardingPage() {
         <AnimatePresence mode="wait">
           <motion.div key={current} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.3 }}>
             <h2 className="font-heading text-xl font-bold mb-6">{q.text}</h2>
-            <div className="space-y-3">
-              {q.options.map((opt, i) => (
-                <button key={i} onClick={() => handleAnswer(opt.score)}
-                  className="w-full p-4 rounded-xl border border-border bg-card text-left card-hover hover:border-primary/50 transition-all">
-                  <span className="text-foreground">{opt.label}</span>
+            {q.type === 'number' ? (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input type="number" value={numInput} onChange={e => setNumInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleNumberSubmit()}
+                    autoFocus placeholder="..." className="flex-1 px-4 py-4 rounded-xl border border-border bg-card text-lg outline-none focus:border-primary" />
+                  <span className="self-center text-muted-foreground">{q.unit}</span>
+                </div>
+                <button onClick={handleNumberSubmit} disabled={!numInput}
+                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold disabled:opacity-50">
+                  Davom etish
                 </button>
-              ))}
-            </div>
+              </div>
+            ) : q.type === 'sex' ? (
+              <div className="grid grid-cols-2 gap-3">
+                {q.options!.map((opt, i) => (
+                  <button key={i} onClick={() => handleSexPick(opt.value!)}
+                    className="p-6 rounded-xl border border-border bg-card text-center card-hover hover:border-primary/50 transition-all text-lg">
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            ) : q.type === 'multi' ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 gap-2">
+                  {q.options!.map((opt, i) => {
+                    const sel = multiSel.includes(opt.value!);
+                    return (
+                      <button key={i} onClick={() => toggleMulti(opt.value!)}
+                        className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${sel ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/30"}`}>
+                        <span className="text-sm">{opt.label}</span>
+                        {sel && <span className="text-primary">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button onClick={handleMultiSubmit}
+                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold">
+                  {multiSel.length === 0 ? "O'tkazib yuborish" : `Davom etish (${multiSel.length})`}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {q.options!.map((opt, i) => (
+                  <button key={i} onClick={() => handleAnswer(opt.score)}
+                    className="w-full p-4 rounded-xl border border-border bg-card text-left card-hover hover:border-primary/50 transition-all">
+                    <span className="text-foreground">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
