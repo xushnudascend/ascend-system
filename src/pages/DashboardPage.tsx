@@ -6,7 +6,7 @@ import {
   Shield, Flame, Zap, Brain, Target, TrendingUp,
   CheckCircle2, Circle, Plus, Dumbbell, Trash2,
   DollarSign, Heart, GraduationCap, ChevronRight,
-  Calculator, MessageCircle, BarChart3, Loader2,
+  Calculator, MessageCircle, BarChart3, Loader2, Trophy,
 } from "lucide-react";
 import { courseCategories } from "@/data/courses";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,6 +32,8 @@ interface Profile {
   discipline_score: number;
   rank: string;
 }
+
+interface LBRow { user_id: string; display_name: string | null; xp: number; streak: number; discipline_score: number; }
 
 const categoryIcons: Record<string, React.ReactNode> = {
   sport: <Dumbbell className="w-5 h-5" />,
@@ -65,6 +67,7 @@ export default function DashboardPage() {
   const [bmiAge, setBmiAge] = useState("");
   const [bmiSex, setBmiSex] = useState<"m" | "f">("m");
   const [weekData, setWeekData] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
+  const [topUsers, setTopUsers] = useState<LBRow[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -77,11 +80,13 @@ export default function DashboardPage() {
 
   const loadAll = async () => {
     setLoading(true);
-    const [{ data: hs }, { data: pf }, { data: logs }] = await Promise.all([
+    const [{ data: hs }, { data: pf }, { data: logs }, { data: lb }] = await Promise.all([
       supabase.from("habits").select("*").eq("user_id", user!.id).order("created_at"),
       supabase.from("profiles").select("xp,streak,discipline_score,rank").eq("user_id", user!.id).maybeSingle(),
       supabase.from("habit_logs").select("log_date,xp_earned").eq("user_id", user!.id)
         .gte("log_date", new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)),
+      supabase.from("profiles").select("user_id,display_name,xp,streak,discipline_score")
+        .order("discipline_score", { ascending: false }).limit(5),
     ]);
 
     // Seed default habits if user has none
@@ -107,6 +112,7 @@ export default function DashboardPage() {
       if (idx >= 0 && idx < 7) week[idx] += l.xp_earned;
     });
     setWeekData(week);
+    setTopUsers(lb || []);
     setLoading(false);
   };
 
@@ -376,6 +382,38 @@ export default function DashboardPage() {
         </motion.div>
 
         <TimeLeakWidget />
+
+        {topUsers.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
+            className="rounded-2xl border border-border bg-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-heading text-lg font-bold flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-primary" /> Top 5
+              </h2>
+              <Link to="/leaderboard" className="text-xs text-primary hover:underline">To'liq reyting →</Link>
+            </div>
+            <div className="space-y-2">
+              {topUsers.map((r, i) => {
+                const isMe = r.user_id === user!.id;
+                const medal = ["🥇", "🥈", "🥉"][i] ?? `#${i + 1}`;
+                return (
+                  <div key={r.user_id}
+                    className={`flex items-center gap-3 p-2.5 rounded-xl ${isMe ? "bg-primary/10 border border-primary/30" : "bg-background/40"}`}>
+                    <span className="font-heading font-bold w-7 text-center text-sm">{medal}</span>
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-heading font-bold text-primary text-sm">
+                      {(r.display_name ?? "?")[0].toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{r.display_name ?? "Anonim"} {isMe && <span className="text-[10px] text-primary">(siz)</span>}</p>
+                      <p className="text-[11px] text-muted-foreground">{r.xp} XP · {r.streak} kun</p>
+                    </div>
+                    <p className="font-heading font-bold text-primary text-sm">{r.discipline_score}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
