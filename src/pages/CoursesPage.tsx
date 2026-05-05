@@ -9,6 +9,12 @@ import { useI18n } from "@/hooks/useI18n";
 
 const allCourses: Course[] = [...baseCourses, ...coursesExtra];
 
+// Sort by level: beginner → intermediate → advanced
+const levelOrder: Record<string, number> = { beginner: 0, intermediate: 1, advanced: 2 };
+function sortByLevel(list: Course[]): Course[] {
+  return [...list].sort((a, b) => (levelOrder[a.level] ?? 99) - (levelOrder[b.level] ?? 99));
+}
+
 // Interleave by category so the "all" view doesn't look like a single category
 function interleaveByCategory(list: Course[]): Course[] {
   const buckets = new Map<string, Course[]>();
@@ -16,6 +22,8 @@ function interleaveByCategory(list: Course[]): Course[] {
     if (!buckets.has(c.category)) buckets.set(c.category, []);
     buckets.get(c.category)!.push(c);
   });
+  // Sort each bucket by level
+  buckets.forEach((arr, k) => buckets.set(k, sortByLevel(arr)));
   const queues = Array.from(buckets.values());
   const out: Course[] = [];
   while (queues.some(q => q.length)) {
@@ -44,7 +52,7 @@ export default function CoursesPage() {
     });
   }
 
-  const source = cat === "all" ? coursesAll : allCourses.filter(c => c.category === cat);
+  const source = cat === "all" ? coursesAll : sortByLevel(allCourses.filter(c => c.category === cat));
   const list = source.filter(c => !q || c.title.toLowerCase().includes(q.toLowerCase()) || c.description.toLowerCase().includes(q.toLowerCase()));
 
   if (active) {
