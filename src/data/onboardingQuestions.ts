@@ -1,8 +1,10 @@
 export interface Question {
   id: number;
-  category: 'discipline' | 'focus' | 'fitness' | 'addiction' | 'finance' | 'mental';
+  category: 'discipline' | 'focus' | 'fitness' | 'addiction' | 'finance' | 'mental' | 'profile' | 'badhabits';
   text: string;
-  options: { label: string; score: number }[];
+  type?: 'choice' | 'number' | 'sex' | 'multi';
+  options?: { label: string; score: number; value?: string }[];
+  unit?: string;
 }
 
 export const questions: Question[] = [
@@ -156,6 +158,43 @@ export const questions: Question[] = [
       { label: "Umuman yo'q", score: 0 },
     ],
   },
+  // ==== Personal profile (5 new) ====
+  {
+    id: 16, category: 'profile', type: 'number',
+    text: "Yoshingiz nechada?", unit: "yosh",
+  },
+  {
+    id: 17, category: 'profile', type: 'number',
+    text: "Bo'yingiz qancha?", unit: "sm",
+  },
+  {
+    id: 18, category: 'profile', type: 'number',
+    text: "Vazningiz qancha?", unit: "kg",
+  },
+  {
+    id: 19, category: 'profile', type: 'sex',
+    text: "Jinsingiz?",
+    options: [
+      { label: "♂ Erkak", score: 0, value: "m" },
+      { label: "♀ Ayol", score: 0, value: "f" },
+    ],
+  },
+  {
+    id: 20, category: 'badhabits', type: 'multi',
+    text: "Sizda qaysi yomon odatlar bor? (bir nechtasini tanlang)",
+    options: [
+      { label: "📱 Telefon/Tarmoqlar (3+ soat)", score: 0, value: "phone" },
+      { label: "🍔 Fast food / shirinlik", score: 0, value: "junkfood" },
+      { label: "🎮 O'yin (3+ soat)", score: 0, value: "gaming" },
+      { label: "🚬 Chekish / vape", score: 0, value: "smoking" },
+      { label: "😴 Kech yotish (00:00+)", score: 0, value: "latesleep" },
+      { label: "🍕 Ortiqcha ovqat", score: 0, value: "overeating" },
+      { label: "📺 Serial / YouTube binge", score: 0, value: "binge" },
+      { label: "💤 Snooze / kech turish", score: 0, value: "snooze" },
+      { label: "🤥 Bahonalar / kechiktirish", score: 0, value: "procrastination" },
+      { label: "🎰 Pornografiya / qimor", score: 0, value: "porn" },
+    ],
+  },
 ];
 
 export interface TestResult {
@@ -166,11 +205,23 @@ export interface TestResult {
   energyLevel: 'low' | 'mid' | 'high';
   rank: 'Beginner' | 'Disciplined' | 'Elite' | 'Apex';
   overallScore: number;
+  age?: number;
+  heightCm?: number;
+  weightKg?: number;
+  sex?: 'm' | 'f';
+  badHabits?: string[];
+  bmi?: number;
+  bmiCategory?: string;
+  recommendedHabits?: { name: string; difficulty: number; xp_reward: number; reason: string }[];
 }
 
-export function calculateResults(answers: Record<number, number>): TestResult {
+export function calculateResults(
+  answers: Record<number, number>,
+  profile?: { age?: number; height?: number; weight?: number; sex?: 'm'|'f'; badHabits?: string[] }
+): TestResult {
   const catScores: Record<string, number[]> = {};
   questions.forEach((q) => {
+    if (!q.options || q.type === 'number' || q.type === 'sex' || q.type === 'multi') return;
     if (!catScores[q.category]) catScores[q.category] = [];
     if (answers[q.id] !== undefined) catScores[q.category].push(answers[q.id]);
   });
@@ -190,5 +241,51 @@ export function calculateResults(answers: Record<number, number>): TestResult {
   const energyLevel = fitness >= 70 ? 'high' : fitness >= 40 ? 'mid' : 'low';
   const rank = overall >= 85 ? 'Apex' : overall >= 65 ? 'Elite' : overall >= 40 ? 'Disciplined' : 'Beginner';
 
-  return { disciplineScore: discipline, focusScore: focus, fitnessScore: fitness, addictionLevel, energyLevel, rank, overallScore: overall };
+  // BMI
+  let bmi: number | undefined;
+  let bmiCategory: string | undefined;
+  if (profile?.weight && profile?.height) {
+    const hM = profile.height / 100;
+    bmi = +(profile.weight / (hM * hM)).toFixed(1);
+    bmiCategory = bmi < 18.5 ? "Kam vazn" : bmi < 25 ? "Normal" : bmi < 30 ? "Ortiqcha vazn" : "Semizlik";
+  }
+
+  // Generate personalized habits based on weak areas + bad habits + profile
+  const recs: { name: string; difficulty: number; xp_reward: number; reason: string }[] = [];
+  if (discipline < 60) recs.push({ name: "Ertalab 6:00 da turish", difficulty: 4, xp_reward: 40, reason: "Intizom past" });
+  if (focus < 60) recs.push({ name: "1 soat telefonsiz fokus bloki", difficulty: 4, xp_reward: 40, reason: "Fokus past" });
+  if (fitness < 60) recs.push({ name: "30 daqiqa harakat (yurish/sport)", difficulty: 3, xp_reward: 30, reason: "Fitness past" });
+  if (mentalRaw * 10 < 50) recs.push({ name: "10 daqiqa meditatsiya", difficulty: 2, xp_reward: 20, reason: "Mental darajasi past" });
+  if (financeRaw * 10 < 50) recs.push({ name: "Kunlik xarajatlarni yozish", difficulty: 2, xp_reward: 20, reason: "Pul boshqaruvi zaif" });
+
+  // BMI-based
+  if (bmi && bmi >= 25) recs.push({ name: "Sahar ovqatlanmasdan 14 soat (intermittent fasting)", difficulty: 4, xp_reward: 40, reason: "Vazn ortiqcha" });
+  if (bmi && bmi < 18.5) recs.push({ name: "Kuniga 3 marta to'liq ovqat + protein", difficulty: 3, xp_reward: 30, reason: "Vazn yetishmaydi" });
+
+  // Bad habits → counter habits
+  const bh = profile?.badHabits || [];
+  if (bh.includes("phone") || bh.includes("binge")) recs.push({ name: "Ekran vaqti 2 soatdan kam", difficulty: 4, xp_reward: 40, reason: "Telefon/serialga bog'liqlik" });
+  if (bh.includes("junkfood") || bh.includes("overeating")) recs.push({ name: "Fast food yo'q — uy ovqati", difficulty: 3, xp_reward: 30, reason: "Yomon ovqatlanish" });
+  if (bh.includes("gaming")) recs.push({ name: "Maks 1 soat gaming", difficulty: 4, xp_reward: 40, reason: "Gaming bog'liqligi" });
+  if (bh.includes("smoking")) recs.push({ name: "Bugun chekmaslik (kun-kun)", difficulty: 5, xp_reward: 50, reason: "Chekishni tashlash" });
+  if (bh.includes("latesleep") || bh.includes("snooze")) recs.push({ name: "23:00 da yotish", difficulty: 3, xp_reward: 30, reason: "Uyqu rejimi yomon" });
+  if (bh.includes("procrastination")) recs.push({ name: "Kunning eng og'ir vazifasi — birinchi", difficulty: 4, xp_reward: 40, reason: "Kechiktirish odati" });
+  if (bh.includes("porn")) recs.push({ name: "Pornografiyadan tiyilish (kun-kun)", difficulty: 5, xp_reward: 50, reason: "Bog'liqlikni yengish" });
+
+  // Always add the foundation
+  if (recs.length < 3) {
+    recs.push({ name: "30 min kitob o'qish", difficulty: 2, xp_reward: 20, reason: "O'rganish odati" });
+    recs.push({ name: "Sovuq dush", difficulty: 3, xp_reward: 30, reason: "Iroda mashqi" });
+  }
+
+  // Limit to top 6
+  const recommendedHabits = recs.slice(0, 6);
+
+  return {
+    disciplineScore: discipline, focusScore: focus, fitnessScore: fitness,
+    addictionLevel, energyLevel, rank, overallScore: overall,
+    age: profile?.age, heightCm: profile?.height, weightKg: profile?.weight,
+    sex: profile?.sex, badHabits: profile?.badHabits, bmi, bmiCategory,
+    recommendedHabits,
+  };
 }
