@@ -127,9 +127,9 @@ export default function OnboardingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-heading text-lg font-semibold flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-primary" /> 15 ta test
+                  <Brain className="w-5 h-5 text-primary" /> 20 ta test
                 </h3>
-                <p className="text-muted-foreground text-sm mt-1">Shaxsiylashtirilgan reja oling (3-5 daqiqa)</p>
+                <p className="text-muted-foreground text-sm mt-1">Shaxsiy reja + vazifalar (4-6 daqiqa)</p>
               </div>
               <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
