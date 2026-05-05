@@ -27,67 +27,67 @@ export default function AppSidebar({ onClose }: Props) {
 
   const groups: { label: string; items: { to: string; icon: any; label: string }[] }[] = [
     {
-      label: t("dashboard"),
+      label: "Asosiy",
       items: [
         { to: "/dashboard", icon: LayoutDashboard, label: t("dashboard") },
         { to: "/war-room", icon: Swords, label: "War Room" },
-        { to: "/identity-quiz", icon: ClipboardList, label: "Identity Quiz" },
         { to: "/life-score", icon: Radar, label: "Life Score" },
-        { to: "/health", icon: Heart, label: "Health & Energy" },
         { to: "/analytics", icon: BarChart3, label: t("analytics") },
-        { to: "/trajectory", icon: LineChart, label: "Trajectory" },
         { to: "/feedback", icon: ClipboardCheck, label: "Daily Feedback" },
       ],
     },
     {
-      label: "Body",
+      label: "Tana & Sog'liq",
       items: [
+        { to: "/health", icon: Heart, label: "Health & Energy" },
         { to: "/workouts", icon: Dumbbell, label: "Workouts & Sport" },
         { to: "/nutrition", icon: Apple, label: "Nutrition" },
       ],
     },
     {
-      label: "Discipline",
+      label: "Intizom",
       items: [
         { to: "/decision-hub", icon: Brain, label: t("decisionEngine") },
         { to: "/command", icon: Power, label: "Command" },
         { to: "/focus", icon: Lock, label: "Focus Lock" },
         { to: "/contracts", icon: FileSignature, label: "Contracts" },
-        { to: "/root-cause", icon: Search, label: "Root Cause" },
         { to: "/drills", icon: Zap, label: "Drills" },
       ],
     },
     {
-      label: "Tracking",
+      label: "Kuzatuv",
       items: [
         { to: "/time-leak", icon: Clock, label: "Time Leak" },
         { to: "/outputs", icon: Target, label: "Outputs" },
         { to: "/fail-log", icon: AlertOctagon, label: "Fail Log" },
-        { to: "/duels", icon: Swords, label: "Duels" },
+        { to: "/root-cause", icon: Search, label: "Root Cause" },
+        { to: "/trajectory", icon: LineChart, label: "Trajectory" },
       ],
     },
     {
-      label: t("sections"),
+      label: "O'rganish",
       items: [
         { to: "/courses", icon: BookOpen, label: t("courses") },
         { to: "/books", icon: Library, label: t("books") },
         { to: "/methods", icon: Beaker, label: t("methods") },
+        { to: "/identity-quiz", icon: ClipboardList, label: "Identity Quiz" },
         { to: "/calm", icon: Heart, label: t("calm") },
         { to: "/characters", icon: Sparkles, label: t("characters") },
       ],
     },
     {
-      label: t("community"),
+      label: "Davra",
       items: [
         { to: "/community", icon: Users, label: t("community") },
         { to: "/wins", icon: Award, label: "Wins Wall" },
         { to: "/buddies", icon: UserPlus, label: t("buddies") },
+        { to: "/duels", icon: Swords, label: "Duels" },
         { to: "/leaderboard", icon: Trophy, label: t("leaderboard") },
         { to: "/ai-mentor", icon: MessageCircle, label: t("aiMentor") },
       ],
     },
     {
-      label: t("profile"),
+      label: "Hisob",
       items: [
         { to: "/profile", icon: UserIcon, label: t("profile") },
         { to: "/pricing", icon: Crown, label: t("pricing") },
