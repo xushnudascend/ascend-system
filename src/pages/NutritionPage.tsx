@@ -180,3 +180,12 @@ export default function NutritionPage() {
     </div>
   );
 }
+
+function Box({ label, v }: { label: string; v: any }) {
+  return (
+    <div className="bg-background border border-border rounded-lg p-2">
+      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className="font-bold text-sm">{v}</div>
+    </div>
+  );
+}
