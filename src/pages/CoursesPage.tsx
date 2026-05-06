@@ -7,7 +7,13 @@ import { courses as baseCourses, courseCategories, type Course } from "@/data/co
 import { coursesExtra } from "@/data/coursesExtra";
 import { useI18n } from "@/hooks/useI18n";
 
-const allCourses: Course[] = [...baseCourses, ...coursesExtra];
+// Dedupe by id (extra entries override base if same id)
+const seen = new Set<string>();
+const allCourses: Course[] = [...baseCourses, ...coursesExtra].filter(c => {
+  if (seen.has(c.id)) return false;
+  seen.add(c.id);
+  return true;
+});
 
 // Sort by level: beginner → intermediate → advanced
 const levelOrder: Record<string, number> = { beginner: 0, intermediate: 1, advanced: 2 };
