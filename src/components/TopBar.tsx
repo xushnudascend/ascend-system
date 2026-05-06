@@ -8,6 +8,7 @@ import { useI18n, type Lang, LANG_NAMES } from "@/hooks/useI18n";
 import { useCoachTone } from "@/hooks/useCoachTone";
 import { useState } from "react";
 import AppSidebar from "./AppSidebar";
+import BottomNav from "./BottomNav";
 
 export default function TopBar() {
   const { signOut, user } = useAuth();
@@ -72,6 +73,7 @@ export default function TopBar() {
         </div>
       </div>
     )}
+    <BottomNav />
     </>
   );
 }
