@@ -48,7 +48,7 @@ export function memoryStore(): IdempotencyStore {
   };
 }
 
-const inflight = new Map<string, Promise<{ status: number; body: unknown }>>();
+const inflight = new Map<string, Promise<{ status: number; body: unknown; replayed: boolean }>>();
 
 /** Wrap a handler so identical POSTs sharing `Idempotency-Key` execute once. */
 export async function withIdempotency(
@@ -82,7 +82,7 @@ export async function withIdempotency(
   // in the same tick hit the inflight branch above instead of double-executing.
   const promise = (async () => {
     const cached = await store.get(key);
-    if (cached) return { status: cached.status, body: cached.response };
+    if (cached) return { status: cached.status, body: cached.response, replayed: true };
     const res = await run();
     const ct = res.headers.get("content-type") || "";
     let body: unknown = null;
@@ -90,12 +90,12 @@ export async function withIdempotency(
       try { body = await res.clone().json(); } catch { body = null; }
     }
     if (body !== null) await store.set(key, res.status, body);
-    return { status: res.status, body };
+    return { status: res.status, body, replayed: false };
   })();
   inflight.set(key, promise);
   try {
-    const { status, body } = await promise;
-    return replay(status, body, false);
+    const { status, body, replayed } = await promise;
+    return replay(status, body, replayed);
   } finally {
     inflight.delete(key);
   }
