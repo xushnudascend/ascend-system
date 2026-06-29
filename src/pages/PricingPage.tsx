@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Check, X, Zap, Crown, Sparkles } from "lucide-react";
 import TopBar from "@/components/TopBar";
 import { useI18n } from "@/hooks/useI18n";
+import SEO from "@/components/SEO";
 
 const tiers = [
   {
@@ -50,6 +51,11 @@ export default function PricingPage() {
   const { t } = useI18n();
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Pricing — Ascend"
+        description="Simple pricing for Ascend. Choose the plan that fits your goals and unlock AI mentorship, courses, and discipline tracking."
+        path="/pricing"
+      />
       <TopBar />
       <div className="max-w-5xl mx-auto px-4 py-12">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
