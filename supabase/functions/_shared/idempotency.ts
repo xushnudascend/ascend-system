@@ -1,61 +1,102 @@
-// Shared idempotency helper for edge functions.
-// Stores response by `Idempotency-Key` header for ~24h so identical POSTs
-// (retries, parallel duplicates) return the cached result instead of re-running.
+// Shared idempotency helper: dedupes POST requests by `Idempotency-Key`.
+// - In-process inflight map: parallel duplicates share one execution.
+// - Persistent store (Supabase): later retries (even from a new instance) replay
+//   the cached JSON response for ~24h.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.95.0";
 
-const url = Deno.env.get("SUPABASE_URL")!;
-const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const TTL_MS = 24 * 60 * 60 * 1000;
 
-function admin() {
-  return createClient(url, serviceKey, { auth: { persistSession: false } });
+export interface IdempotencyStore {
+  get(key: string): Promise<{ status: number; response: unknown } | null>;
+  set(key: string, status: number, response: unknown): Promise<void>;
 }
 
-export async function getCached(key: string): Promise<{ status: number; response: unknown } | null> {
-  if (!key) return null;
-  const db = admin();
-  const { data } = await db
-    .from("idempotency_keys")
-    .select("status,response,created_at")
-    .eq("key", key)
-    .maybeSingle();
-  if (!data) return null;
-  if (Date.now() - new Date(data.created_at).getTime() > TTL_MS) return null;
-  return { status: data.status, response: data.response };
+function supabaseStore(): IdempotencyStore {
+  const url = Deno.env.get("SUPABASE_URL")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const db = createClient(url, serviceKey, { auth: { persistSession: false } });
+  return {
+    async get(key) {
+      const { data } = await db
+        .from("idempotency_keys")
+        .select("status,response,created_at")
+        .eq("key", key)
+        .maybeSingle();
+      if (!data) return null;
+      if (Date.now() - new Date(data.created_at).getTime() > TTL_MS) return null;
+      return { status: data.status, response: data.response };
+    },
+    async set(key, status, response) {
+      await db.from("idempotency_keys").upsert({ key, status, response }, { onConflict: "key" });
+    },
+  };
 }
 
-export async function saveCached(key: string, status: number, response: unknown) {
-  if (!key) return;
-  const db = admin();
-  await db.from("idempotency_keys").upsert({ key, status, response }, { onConflict: "key" });
+// In-memory store useful for tests.
+export function memoryStore(): IdempotencyStore {
+  const m = new Map<string, { status: number; response: unknown; at: number }>();
+  return {
+    async get(key) {
+      const v = m.get(key);
+      if (!v) return null;
+      if (Date.now() - v.at > TTL_MS) return null;
+      return { status: v.status, response: v.response };
+    },
+    async set(key, status, response) {
+      m.set(key, { status, response, at: Date.now() });
+    },
+  };
 }
 
-/** Wrap a handler so identical POSTs sharing an Idempotency-Key are deduped. */
+const inflight = new Map<string, Promise<{ status: number; body: unknown; replayed: boolean }>>();
+
+/** Wrap a handler so identical POSTs sharing `Idempotency-Key` execute once. */
 export async function withIdempotency(
   req: Request,
   corsHeaders: Record<string, string>,
   run: () => Promise<Response>,
+  store: IdempotencyStore = supabaseStore(),
 ): Promise<Response> {
   if (req.method !== "POST") return run();
   const key = req.headers.get("Idempotency-Key") || "";
   if (!key) return run();
 
-  const cached = await getCached(key);
-  if (cached) {
-    return new Response(JSON.stringify(cached.response), {
-      status: cached.status,
-      headers: { ...corsHeaders, "Content-Type": "application/json", "Idempotent-Replay": "true" },
+  const replay = (status: number, body: unknown, replayed: boolean) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+        ...(replayed ? { "Idempotent-Replay": "true" } : {}),
+      },
     });
+
+  // Parallel duplicate? wait for the in-flight execution.
+  const pending = inflight.get(key);
+  if (pending) {
+    const { status, body } = await pending;
+    return replay(status, body, true);
   }
 
-  const res = await run();
-  // Only cache JSON responses we can safely replay.
-  const ct = res.headers.get("content-type") || "";
-  if (ct.includes("application/json")) {
-    try {
-      const body = await res.clone().json();
-      await saveCached(key, res.status, body);
-    } catch { /* skip caching on parse error */ }
+  // Register the promise SYNCHRONOUSLY (before any await) so concurrent callers
+  // in the same tick hit the inflight branch above instead of double-executing.
+  const promise = (async () => {
+    const cached = await store.get(key);
+    if (cached) return { status: cached.status, body: cached.response, replayed: true };
+    const res = await run();
+    const ct = res.headers.get("content-type") || "";
+    let body: unknown = null;
+    if (ct.includes("application/json")) {
+      try { body = await res.clone().json(); } catch { body = null; }
+    }
+    if (body !== null) await store.set(key, res.status, body);
+    return { status: res.status, body, replayed: false };
+  })();
+  inflight.set(key, promise);
+  try {
+    const { status, body, replayed } = await promise;
+    return replay(status, body, replayed);
+  } finally {
+    inflight.delete(key);
   }
-  return res;
 }
