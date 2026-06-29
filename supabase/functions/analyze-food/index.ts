@@ -1,8 +1,10 @@
 import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
+import { withIdempotency } from "../_shared/idempotency.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  try {
+  return withIdempotency(req, corsHeaders, async () => {
+   try {
     const { image, note } = await req.json();
     if (!image || typeof image !== "string") {
       return new Response(JSON.stringify({ error: "image (base64 data URL) required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -39,7 +41,8 @@ Be realistic. If unclear, lower confidence. Numbers integers.`;
     let parsed: any;
     try { parsed = JSON.parse(content); } catch { parsed = { raw: content }; }
     return new Response(JSON.stringify(parsed), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  } catch (e) {
+   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  }
+   }
+  });
 });
