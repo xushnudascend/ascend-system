@@ -7,11 +7,35 @@ import { metrics } from "../_shared/idempotency.ts";
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const db = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { auth: { persistSession: false } },
-  );
+  const url = Deno.env.get("SUPABASE_URL")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+  const unauth = (msg: string, status = 401) =>
+    new Response(JSON.stringify({ error: msg }), {
+      status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+  // --- Authorize: service role key OR admin user ---
+  const auth = req.headers.get("Authorization") || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!token) return unauth("Authorization required");
+
+  if (token !== serviceKey) {
+    const userClient = createClient(url, anonKey, {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: auth } },
+    });
+    const { data: claims, error } = await userClient.auth.getClaims(token);
+    if (error || !claims?.claims?.sub) return unauth("Invalid token");
+    const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+    const { data: isAdmin } = await admin.rpc("has_role", {
+      _user_id: claims.claims.sub, _role: "admin",
+    });
+    if (!isAdmin) return unauth("Admin only", 403);
+  }
+
+  const db = createClient(url, serviceKey, { auth: { persistSession: false } });
 
   // Persistent counters from the store
   const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
