@@ -67,11 +67,15 @@ function Banner() {
     const orig = window.fetch.bind(window);
     let patching = false;
     const inflight = new Map<string, Promise<Response>>();
+    // Only string bodies are safely hashable/comparable. For Blob/FormData/
+    // ArrayBuffer we cannot tell two payloads apart synchronously, so we must
+    // NOT dedupe or attach an Idempotency-Key — doing so would make parallel
+    // image uploads collide and replay each other's response.
+    const isStringBody = (b: BodyInit | null | undefined): b is string => typeof b === "string";
     const keyOf = (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
       const method = (init?.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
-      let body = "";
-      if (init?.body && typeof init.body === "string") body = init.body;
+      const body = isStringBody(init?.body) ? init!.body : "";
       return `${method} ${url} ${body}`;
     };
     const hash = (s: string) => {
@@ -80,17 +84,20 @@ function Banner() {
       return (h >>> 0).toString(36);
     };
     (window as any).fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const key = keyOf(input, init);
       const method = (init?.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
-      // Attach Idempotency-Key for POSTs so server can dedupe identical writes
-      if (method === "POST") {
+      const dedupable = method === "POST" && isStringBody(init?.body);
+
+      // Attach Idempotency-Key only when we can hash the body deterministically.
+      if (dedupable) {
         const headers = new Headers(init?.headers || (input instanceof Request ? input.headers : undefined));
         if (!headers.has("Idempotency-Key")) {
-          headers.set("Idempotency-Key", hash(key));
+          headers.set("Idempotency-Key", hash(keyOf(input, init)));
           init = { ...(init || {}), headers };
         }
       }
       const run = () => {
+        if (!dedupable) return orig(input, init);
+        const key = keyOf(input, init);
         const existing = inflight.get(key);
         if (existing) return existing.then((r) => r.clone());
         const p = orig(input, init).finally(() => inflight.delete(key));
