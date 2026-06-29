@@ -1,8 +1,8 @@
 import { Component, ReactNode, useEffect, useState } from "react";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, RefreshCw, X, Loader2 } from "lucide-react";
 
-type Item = { id: number; msg: string };
-let push: ((msg: string) => void) | null = null;
+type Item = { id: number; msg: string; retry?: () => Promise<void> | void; busy?: boolean };
+let push: ((msg: string, retry?: () => Promise<void> | void) => void) | null = null;
 
 function friendly(input: unknown): string {
   const raw =
@@ -30,22 +30,56 @@ function friendly(input: unknown): string {
 function Banner() {
   const [items, setItems] = useState<Item[]>([]);
   useEffect(() => {
-    push = (msg) => {
+    push = (msg, retry) => {
       const id = Date.now() + Math.random();
-      setItems((p) => [...p, { id, msg }]);
-      setTimeout(() => setItems((p) => p.filter((i) => i.id !== id)), 6000);
+      setItems((p) => [...p, { id, msg, retry }]);
+      if (!retry) setTimeout(() => setItems((p) => p.filter((i) => i.id !== id)), 6000);
     };
     const onErr = (e: ErrorEvent) => push?.(friendly(e.error || e.message));
     const onRej = (e: PromiseRejectionEvent) => push?.(friendly(e.reason));
     window.addEventListener("error", onErr);
     window.addEventListener("unhandledrejection", onRej);
+
+    // Patch global fetch to capture failed API calls and offer auto-retry
+    const orig = window.fetch.bind(window);
+    let patching = false;
+    (window as any).fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const run = () => orig(input, init);
+      try {
+        const res = await run();
+        if (!res.ok && res.status >= 500 && !patching) {
+          push?.(`Server xatosi (${res.status})`, async () => {
+            patching = true;
+            try { await run(); } finally { patching = false; }
+          });
+        }
+        return res;
+      } catch (e: any) {
+        push?.(friendly(e), async () => { await run(); });
+        throw e;
+      }
+    };
+
     return () => {
       window.removeEventListener("error", onErr);
       window.removeEventListener("unhandledrejection", onRej);
+      (window as any).fetch = orig;
       push = null;
     };
   }, []);
   if (!items.length) return null;
+
+  const handleRetry = async (i: Item) => {
+    if (!i.retry) return;
+    setItems((p) => p.map((x) => (x.id === i.id ? { ...x, busy: true } : x)));
+    try {
+      await i.retry();
+      setItems((p) => p.filter((x) => x.id !== i.id));
+    } catch {
+      setItems((p) => p.map((x) => (x.id === i.id ? { ...x, busy: false } : x)));
+    }
+  };
+
   return (
     <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[100] w-[min(92vw,520px)] space-y-2 pointer-events-none">
       {items.map((i) => (
@@ -55,6 +89,16 @@ function Banner() {
         >
           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-rose-400" />
           <div className="flex-1">{i.msg}</div>
+          {i.retry && (
+            <button
+              onClick={() => handleRetry(i)}
+              disabled={i.busy}
+              className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 disabled:opacity-50"
+            >
+              {i.busy ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              Qayta urinib ko'rish
+            </button>
+          )}
           <button
             onClick={() => setItems((p) => p.filter((x) => x.id !== i.id))}
             className="opacity-60 hover:opacity-100"
