@@ -40,6 +40,26 @@ function Banner() {
     window.addEventListener("error", onErr);
     window.addEventListener("unhandledrejection", onRej);
 
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const isNetErr = (e: any) =>
+      /Failed to fetch|NetworkError|ERR_NETWORK|TypeError/i.test(String(e?.message || e));
+    const retryWithBackoff = async (run: () => Promise<Response>) => {
+      const delays = [500, 1000, 2000];
+      let lastErr: any;
+      for (let i = 0; i < delays.length; i++) {
+        try {
+          const r = await run();
+          if (r.ok || r.status < 500) return r;
+          lastErr = new Error(`HTTP ${r.status}`);
+        } catch (e) {
+          lastErr = e;
+          if (!isNetErr(e)) throw e;
+        }
+        await sleep(delays[i]);
+      }
+      throw lastErr;
+    };
+
     // Patch global fetch to capture failed API calls and offer auto-retry
     const orig = window.fetch.bind(window);
     let patching = false;
@@ -50,12 +70,12 @@ function Banner() {
         if (!res.ok && res.status >= 500 && !patching) {
           push?.(`Server xatosi (${res.status})`, async () => {
             patching = true;
-            try { await run(); } finally { patching = false; }
+            try { await retryWithBackoff(run); } finally { patching = false; }
           });
         }
         return res;
       } catch (e: any) {
-        push?.(friendly(e), async () => { await run(); });
+        push?.(friendly(e), async () => { await retryWithBackoff(run); });
         throw e;
       }
     };
