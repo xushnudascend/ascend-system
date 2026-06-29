@@ -181,8 +181,20 @@ export default function DashboardPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <div className="max-w-5xl mx-auto px-4 py-6 space-y-6 animate-pulse" role="status" aria-label="Yuklanmoqda">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="col-span-2 h-32 rounded-2xl border border-border bg-card" />
+            <div className="h-32 rounded-2xl border border-border bg-card" />
+            <div className="h-32 rounded-2xl border border-border bg-card" />
+          </div>
+          <div className="h-64 rounded-2xl border border-border bg-card" />
+          <div className="h-48 rounded-2xl border border-border bg-card" />
+          <span className="sr-only">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" /> Yuklanmoqda…
+          </span>
+        </div>
       </div>
     );
   }
@@ -205,18 +217,19 @@ export default function DashboardPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="p-6 rounded-2xl border border-border bg-card">
+            className="p-6 rounded-2xl border border-border bg-card transition-colors hover:border-primary/30">
             <p className="text-sm text-muted-foreground flex items-center gap-1"><Flame className="w-4 h-4" /> Streak</p>
-            <p className={`font-heading text-4xl font-bold mt-1 ${streak < 3 ? "text-destructive" : "text-success"}`}>
-              {streak}<span className="text-lg">kun</span>
+            <p className={`font-heading text-4xl font-bold mt-1 tabular-nums ${streak < 3 ? "text-destructive" : "text-success"}`}>
+              {streak}<span className="text-lg font-medium text-muted-foreground ml-1">kun</span>
             </p>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-            className="p-6 rounded-2xl border border-border bg-card">
+            className="p-6 rounded-2xl border border-border bg-card transition-colors hover:border-primary/30">
             <p className="text-sm text-muted-foreground flex items-center gap-1"><Zap className="w-4 h-4" /> Level {level}</p>
-            <p className="font-heading text-2xl font-bold text-xp mt-1">{xp} XP</p>
+            <p className="font-heading text-2xl font-bold text-xp mt-1 tabular-nums">{xp.toLocaleString()} <span className="text-sm text-muted-foreground font-medium">XP</span></p>
             <Progress value={(xpInLevel / 200) * 100} className="h-1.5 mt-2" />
+            <p className="text-[10px] text-muted-foreground mt-1 tabular-nums">{xpInLevel} / 200 keyingi levelgacha</p>
           </motion.div>
         </div>
 
@@ -229,16 +242,22 @@ export default function DashboardPage() {
             <span className="text-sm text-muted-foreground">{completedCount}/{habits.length}</span>
           </div>
           <div className="space-y-2">
+            {habits.length === 0 && (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                Hozircha odat yo'q. Quyidan birinchisini qo'shing.
+              </div>
+            )}
             {habits.map(h => (
               <div key={h.id}
                 className={`group w-full flex items-center gap-3 p-3 rounded-xl transition-all ${h.completed ? "bg-success/10 border border-success/20" : "bg-card border border-border hover:border-primary/30"}`}>
-                <button onClick={() => toggleHabit(h)} disabled={h.completed} className="shrink-0">
+                <button onClick={() => toggleHabit(h)} disabled={h.completed} aria-label={h.completed ? "Bajarildi" : "Bajarildi deb belgilash"} className="shrink-0 disabled:cursor-default">
                   {h.completed ? <CheckCircle2 className="w-5 h-5 text-success" /> : <Circle className="w-5 h-5 text-muted-foreground" />}
                 </button>
-                <span className={`text-sm flex-1 text-left ${h.completed ? "line-through text-muted-foreground" : ""}`}>{h.name}</span>
-                {h.streak > 0 && <span className="text-xs text-warning flex items-center gap-0.5"><Flame className="w-3 h-3" />{h.streak}</span>}
-                <span className="text-xs text-xp">+{h.xp_reward}</span>
-                <button onClick={() => deleteHabit(h.id)} className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className={`text-sm flex-1 text-left truncate ${h.completed ? "line-through text-muted-foreground" : ""}`}>{h.name}</span>
+                {h.streak > 0 && <span className="text-xs text-warning flex items-center gap-0.5 tabular-nums shrink-0"><Flame className="w-3 h-3" />{h.streak}</span>}
+                <span className="text-xs text-xp tabular-nums shrink-0">+{h.xp_reward}</span>
+                <button onClick={() => deleteHabit(h.id)} aria-label={`O'chirish: ${h.name}`}
+                  className="md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity p-1 -mr-1 rounded hover:bg-destructive/10">
                   <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
                 </button>
               </div>
@@ -247,12 +266,13 @@ export default function DashboardPage() {
           {showAddHabit ? (
             <div className="flex gap-2 mt-3">
               <input value={newHabit} onChange={e => setNewHabit(e.target.value)} onKeyDown={e => e.key === "Enter" && addHabit()}
-                placeholder="Yangi odat..." className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" autoFocus />
-              <button onClick={addHabit} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium">Qo'shish</button>
+                placeholder="Yangi odat..." className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40" autoFocus />
+              <button onClick={addHabit} disabled={!newHabit.trim()} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed">Qo'shish</button>
+              <button onClick={() => { setShowAddHabit(false); setNewHabit(""); }} className="px-3 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:bg-muted transition-colors">Bekor</button>
             </div>
           ) : (
             <button onClick={() => setShowAddHabit(true)}
-              className="w-full mt-3 py-2 rounded-xl border border-dashed border-border text-muted-foreground text-sm flex items-center justify-center gap-1 hover:border-primary/50 transition-colors">
+              className="w-full mt-3 py-2 rounded-xl border border-dashed border-border text-muted-foreground text-sm flex items-center justify-center gap-1 hover:border-primary/50 hover:text-primary transition-colors">
               <Plus className="w-4 h-4" /> Odat qo'shish
             </button>
           )}
@@ -368,13 +388,18 @@ export default function DashboardPage() {
           <div className="flex items-end gap-2 h-32">
             {["Du", "Se", "Cho", "Pa", "Ju", "Sh", "Ya"].map((d, i) => {
               const val = (weekData[i] / maxWeek) * 100;
+              const isToday = i === 6;
               return (
-                <div key={d} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full rounded-t-lg bg-primary/20 relative" style={{ height: `${Math.max(val, 4)}%` }}>
-                    <div className="absolute bottom-0 w-full rounded-t-lg bg-primary transition-all" style={{ height: "100%" }} />
+                <div key={d} className="flex-1 flex flex-col items-center gap-1 group">
+                  <div className="w-full flex items-end h-full rounded-t-lg bg-muted/30 overflow-hidden">
+                    <div
+                      className={`w-full rounded-t-lg transition-all duration-500 ${isToday ? "bg-gradient-to-t from-primary to-accent shadow-[0_0_12px_hsl(var(--glow)/0.4)]" : "bg-primary/60 group-hover:bg-primary"}`}
+                      style={{ height: `${Math.max(val, 4)}%` }}
+                      title={`${weekData[i]} XP`}
+                    />
                   </div>
-                  <span className="text-xs text-muted-foreground">{d}</span>
-                  <span className="text-[10px] text-xp">{weekData[i]}</span>
+                  <span className={`text-xs ${isToday ? "text-primary font-semibold" : "text-muted-foreground"}`}>{d}</span>
+                  <span className="text-[10px] text-xp tabular-nums">{weekData[i]}</span>
                 </div>
               );
             })}
