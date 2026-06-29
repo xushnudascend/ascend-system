@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useI18n, type Lang, LANG_NAMES } from "@/hooks/useI18n";
 import { useCoachTone } from "@/hooks/useCoachTone";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AppSidebar from "./AppSidebar";
 import BottomNav from "./BottomNav";
 
@@ -18,6 +18,21 @@ export default function TopBar() {
   const loc = useLocation();
   const [openLang, setOpenLang] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!openLang) return;
+    const onDoc = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setOpenLang(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpenLang(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [openLang]);
 
   return (
     <>
@@ -34,7 +49,7 @@ export default function TopBar() {
             {tone === "hard" ? <Flame className="w-4 h-4" /> : <HeartHandshake className="w-4 h-4" />}
             <span className="hidden sm:inline">{tone === "hard" ? "Hard" : "Soft"}</span>
           </button>
-          <div className="relative">
+          <div className="relative" ref={langRef}>
             <button onClick={() => setOpenLang(o => !o)} className="p-2 rounded-lg hover:bg-card transition-colors flex items-center gap-1 text-xs text-muted-foreground">
               <Globe className="w-4 h-4" /> {lang.toUpperCase()}
             </button>

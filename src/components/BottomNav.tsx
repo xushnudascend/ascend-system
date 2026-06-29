@@ -142,8 +142,8 @@ export default function BottomNav() {
         </div>
         <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
-      {/* spacer to prevent content being hidden */}
-      <div className="h-16" aria-hidden />
+      {/* spacer to prevent content being hidden behind fixed nav (includes iOS safe area) */}
+      <div aria-hidden className="h-16" style={{ height: "calc(4rem + env(safe-area-inset-bottom))" }} />
     </>
   );
 }
