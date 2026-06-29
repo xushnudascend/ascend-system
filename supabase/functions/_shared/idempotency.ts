@@ -71,19 +71,18 @@ export async function withIdempotency(
       },
     });
 
-  // 1. Parallel duplicate? wait for the in-flight execution.
+  // Parallel duplicate? wait for the in-flight execution.
   const pending = inflight.get(key);
   if (pending) {
     const { status, body } = await pending;
     return replay(status, body, true);
   }
 
-  // 2. Already cached in store?
-  const cached = await store.get(key);
-  if (cached) return replay(cached.status, cached.response, true);
-
-  // 3. Execute exactly once and share the promise with concurrent callers.
+  // Register the promise SYNCHRONOUSLY (before any await) so concurrent callers
+  // in the same tick hit the inflight branch above instead of double-executing.
   const promise = (async () => {
+    const cached = await store.get(key);
+    if (cached) return { status: cached.status, body: cached.response };
     const res = await run();
     const ct = res.headers.get("content-type") || "";
     let body: unknown = null;
