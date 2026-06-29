@@ -1,0 +1,81 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Idempotency Metrics API",
+    "version": "1.0.0",
+    "description": "Observability endpoint for the shared idempotency layer used by Lovable Cloud edge functions. Returns per-instance counters (hits/misses/inflight dedupes/handler runs/errors) and persistent store statistics. Restricted to service role key or admin users."
+  },
+  "servers": [
+    { "url": "https://{projectRef}.functions.supabase.co", "variables": { "projectRef": { "default": "your-project-ref" } } }
+  ],
+  "paths": {
+    "/idempotency-metrics": {
+      "get": {
+        "summary": "Get idempotency metrics",
+        "operationId": "getIdempotencyMetrics",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Metrics snapshot",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MetricsBody" } } }
+          },
+          "401": { "description": "Missing or invalid bearer token", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "403": { "description": "Authenticated but not an admin",       "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "options": { "summary": "CORS preflight", "responses": { "200": { "description": "ok" } } }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Either the Supabase service role key OR a user JWT belonging to a user with the `admin` role."
+      }
+    },
+    "schemas": {
+      "MetricsBody": {
+        "type": "object",
+        "required": ["instance", "store", "now"],
+        "additionalProperties": false,
+        "properties": {
+          "instance": { "$ref": "#/components/schemas/InstanceMetrics" },
+          "store":    { "$ref": "#/components/schemas/StoreMetrics" },
+          "now":      { "type": "string", "format": "date-time", "description": "Server time when the snapshot was taken (ISO 8601, UTC)." }
+        }
+      },
+      "InstanceMetrics": {
+        "type": "object",
+        "description": "Counters scoped to a single edge function instance; reset when the instance is recycled.",
+        "required": ["requests","store_hits","inflight_hits","misses","handler_runs","errors","started_at","hit_rate"],
+        "additionalProperties": false,
+        "properties": {
+          "requests":      { "type": "integer", "minimum": 0, "description": "POST requests received with an Idempotency-Key header." },
+          "store_hits":    { "type": "integer", "minimum": 0, "description": "Served from the persistent store (replay)." },
+          "inflight_hits": { "type": "integer", "minimum": 0, "description": "Served by joining a concurrent in-flight execution." },
+          "misses":        { "type": "integer", "minimum": 0, "description": "Had to execute the handler." },
+          "handler_runs":  { "type": "integer", "minimum": 0, "description": "Total handler invocations (always <= misses)." },
+          "errors":        { "type": "integer", "minimum": 0, "description": "Handler or store errors observed." },
+          "started_at":    { "type": "string", "format": "date-time", "description": "When this instance started counting." },
+          "hit_rate":      { "type": "number",  "minimum": 0, "maximum": 100, "description": "(store_hits + inflight_hits) / requests * 100, rounded to 2 decimals." }
+        }
+      },
+      "StoreMetrics": {
+        "type": "object",
+        "description": "Counters read from the persistent idempotency_keys table.",
+        "required": ["total_keys","keys_last_24h"],
+        "additionalProperties": false,
+        "properties": {
+          "total_keys":    { "type": "integer", "minimum": 0 },
+          "keys_last_24h": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": { "error": { "type": "string" } }
+      }
+    }
+  }
+}
