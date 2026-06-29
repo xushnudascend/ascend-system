@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { questions, calculateResults, type TestResult } from "@/data/onboardingQuestions";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, Zap, Brain, Dumbbell, Shield, Trophy, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, Brain, Dumbbell, Shield, Trophy, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -100,17 +100,41 @@ export default function OnboardingPage() {
     Apex: 'text-success',
   };
 
+  const handleBack = () => {
+    if (current === 0) return;
+    setCurrent(current - 1);
+    setNumInput("");
+    setMultiSel([]);
+  };
+
   if (mode === 'choice') {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="relative min-h-screen bg-background flex items-center justify-center p-4 overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[480px] w-[680px] rounded-full bg-primary/15 blur-[120px]" />
+        </div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg space-y-6">
           <div className="text-center mb-8">
-            <h1 className="font-heading text-3xl font-bold">Boshlashdan oldin</h1>
-            <p className="text-muted-foreground mt-2">Qanday boshlashni tanlang</p>
+            <h1 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight">Boshlashdan oldin</h1>
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base">Qanday boshlashni tanlang</p>
           </div>
 
+          <button onClick={() => setMode('test')}
+            className="relative w-full p-6 rounded-2xl border border-primary/50 bg-card glow-border card-hover text-left group">
+            <span className="absolute -top-2.5 right-4 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary text-primary-foreground">Tavsiya</span>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-heading text-lg font-semibold flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-primary" /> 20 ta test
+                </h3>
+                <p className="text-muted-foreground text-sm mt-1">Shaxsiy reja + vazifalar (4–6 daqiqa)</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+
           <button onClick={handleQuickStart}
-            className="w-full p-6 rounded-xl border border-border bg-card card-hover text-left group">
+            className="w-full p-6 rounded-2xl border border-border bg-card card-hover text-left group">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-heading text-lg font-semibold flex items-center gap-2">
@@ -118,20 +142,7 @@ export default function OnboardingPage() {
                 </h3>
                 <p className="text-muted-foreground text-sm mt-1">Standart reja bilan darhol boshlang</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </div>
-          </button>
-
-          <button onClick={() => setMode('test')}
-            className="w-full p-6 rounded-xl border border-primary/50 bg-card glow-border card-hover text-left group">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-heading text-lg font-semibold flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-primary" /> 20 ta test
-                </h3>
-                <p className="text-muted-foreground text-sm mt-1">Shaxsiy reja + vazifalar (4-6 daqiqa)</p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
           </button>
         </motion.div>
@@ -204,29 +215,45 @@ export default function OnboardingPage() {
   const progress = ((current + 1) / questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="relative min-h-screen bg-background flex items-center justify-center p-4 overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[420px] w-[620px] rounded-full bg-primary/10 blur-[120px]" />
+      </div>
       <div className="w-full max-w-lg">
         <div className="mb-8">
-          <div className="flex justify-between text-sm text-muted-foreground mb-2">
-            <span>{current + 1} / {questions.length}</span>
-            <span>{q.category}</span>
+          <div className="flex items-center justify-between mb-2 gap-3">
+            <button
+              type="button"
+              onClick={handleBack}
+              disabled={current === 0}
+              aria-label="Orqaga"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Orqaga
+            </button>
+            <span className="text-xs font-medium text-muted-foreground tabular-nums">
+              {current + 1} <span className="opacity-60">/ {questions.length}</span>
+            </span>
+            <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
+              {q.category}
+            </span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
 
         <AnimatePresence mode="wait">
           <motion.div key={current} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.3 }}>
-            <h2 className="font-heading text-xl font-bold mb-6">{q.text}</h2>
+            <h2 className="font-heading text-xl sm:text-2xl font-bold mb-6 leading-snug">{q.text}</h2>
             {q.type === 'number' ? (
               <div className="space-y-3">
                 <div className="flex gap-2">
-                  <input type="number" value={numInput} onChange={e => setNumInput(e.target.value)}
+                  <input type="number" inputMode="numeric" value={numInput} onChange={e => setNumInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleNumberSubmit()}
-                    autoFocus placeholder="..." className="flex-1 px-4 py-4 rounded-xl border border-border bg-card text-lg outline-none focus:border-primary" />
+                    autoFocus placeholder="..." className="flex-1 px-4 py-4 rounded-xl border border-border bg-card text-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all" />
                   <span className="self-center text-muted-foreground">{q.unit}</span>
                 </div>
                 <button onClick={handleNumberSubmit} disabled={!numInput}
-                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold disabled:opacity-50">
+                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100">
                   Davom etish
                 </button>
               </div>
