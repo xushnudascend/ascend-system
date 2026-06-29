@@ -66,8 +66,23 @@ function Banner() {
     // Patch global fetch to capture failed API calls and offer auto-retry
     const orig = window.fetch.bind(window);
     let patching = false;
+    const inflight = new Map<string, Promise<Response>>();
+    const keyOf = (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      const method = (init?.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
+      let body = "";
+      if (init?.body && typeof init.body === "string") body = init.body;
+      return `${method} ${url} ${body}`;
+    };
     (window as any).fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const run = () => orig(input, init);
+      const key = keyOf(input, init);
+      const run = () => {
+        const existing = inflight.get(key);
+        if (existing) return existing.then((r) => r.clone());
+        const p = orig(input, init).finally(() => inflight.delete(key));
+        inflight.set(key, p);
+        return p.then((r) => r.clone());
+      };
       try {
         const res = await run();
         if (!res.ok && res.status >= 500 && !patching) {
