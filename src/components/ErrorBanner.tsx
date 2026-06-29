@@ -74,8 +74,22 @@ function Banner() {
       if (init?.body && typeof init.body === "string") body = init.body;
       return `${method} ${url} ${body}`;
     };
+    const hash = (s: string) => {
+      let h = 5381;
+      for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+      return (h >>> 0).toString(36);
+    };
     (window as any).fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       const key = keyOf(input, init);
+      const method = (init?.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
+      // Attach Idempotency-Key for POSTs so server can dedupe identical writes
+      if (method === "POST") {
+        const headers = new Headers(init?.headers || (input instanceof Request ? input.headers : undefined));
+        if (!headers.has("Idempotency-Key")) {
+          headers.set("Idempotency-Key", hash(key));
+          init = { ...(init || {}), headers };
+        }
+      }
       const run = () => {
         const existing = inflight.get(key);
         if (existing) return existing.then((r) => r.clone());
