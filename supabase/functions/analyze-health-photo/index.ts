@@ -1,8 +1,10 @@
 import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
+import { withIdempotency } from "../_shared/idempotency.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  try {
+  return withIdempotency(req, corsHeaders, async () => {
+   try {
     const { image } = await req.json();
     if (!image) return new Response(JSON.stringify({ error: "image required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
@@ -35,7 +37,8 @@ Keep tips actionable & in Uzbek if possible.`;
     const content = data.choices?.[0]?.message?.content ?? "{}";
     let parsed: any; try { parsed = JSON.parse(content); } catch { parsed = { raw: content }; }
     return new Response(JSON.stringify(parsed), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  } catch (e) {
+   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  }
+   }
+  });
 });
