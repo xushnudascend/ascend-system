@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Flame, Target, Brain, Zap, Shield, Sparkles, ListChecks, TrendingUp } from "lucide-react";
+import { ArrowRight, Flame, Target, Brain, Zap, Shield, Sparkles, ListChecks, TrendingUp, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n, LANG_NAMES, type Lang } from "@/hooks/useI18n";
@@ -40,39 +40,53 @@ export default function LandingPage() {
         path="/"
       />
       {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="container flex items-center justify-between h-16 gap-3">
-          <span className="font-heading text-xl font-bold tracking-tight text-foreground">
+      <header className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl">
+        <nav className="container flex items-center justify-between h-16 gap-3" aria-label="Primary">
+          <Link to="/" className="font-heading text-xl font-bold tracking-tight text-foreground hover:opacity-80 transition-opacity">
             ASCEND<span className="text-primary">.</span>
-          </span>
-          <div className="flex items-center gap-2">
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value as Lang)}
-              className="bg-card border border-border rounded-md text-xs px-2 py-1.5 text-foreground"
-              aria-label="Language"
-            >
-              {Object.entries(LANG_NAMES).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
-          <Link
-            to={user ? "/dashboard" : "/auth"}
-            className="px-5 py-2 rounded-lg bg-primary text-primary-foreground font-heading text-sm font-semibold hover:brightness-110 transition-all"
-          >
-              {user ? t("dashboard") : t("landingStartNow")}
           </Link>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Globe className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" aria-hidden />
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value as Lang)}
+                className="appearance-none bg-card border border-border rounded-md text-xs pl-7 pr-2 py-1.5 text-foreground hover:border-primary/40 transition-colors cursor-pointer"
+                aria-label="Language"
+              >
+                {Object.entries(LANG_NAMES).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
+            </div>
+            {!user && (
+              <Link
+                to="/auth"
+                className="hidden sm:inline-flex px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t("login") ?? "Kirish"}
+              </Link>
+            )}
+            <Link
+              to={user ? "/dashboard" : "/auth"}
+              className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-heading text-sm font-semibold hover:brightness-110 transition-all"
+            >
+              {user ? t("dashboard") : t("landingStartNow")}
+            </Link>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
+      <main>
       {/* Hero */}
       <section className="relative pt-32 pb-20 md:pt-44 md:pb-32">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden -z-0">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[680px] h-[680px] rounded-full bg-primary/10 blur-[140px]" />
+          <div className="absolute bottom-0 right-[-120px] w-[420px] h-[420px] rounded-full bg-accent/10 blur-[120px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0,hsl(var(--background))_70%)]" />
         </div>
 
-        <div className="container relative text-center max-w-3xl mx-auto px-4">
+        <div className="container relative z-10 text-center max-w-3xl mx-auto px-4">
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -110,7 +124,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-12"
+            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Link
               to="/auth"
@@ -119,7 +133,21 @@ export default function LandingPage() {
               {t("landingStartNow")}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
+            <a
+              href="#how-it-works"
+              className="inline-flex items-center gap-2 px-6 py-4 rounded-xl border border-border bg-card/40 text-foreground font-heading text-base font-semibold hover:border-primary/40 hover:bg-card transition-all"
+            >
+              {t("landingHowTitle")}
+            </a>
           </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.1 }}
+            className="mt-4 text-xs text-muted-foreground"
+          >
+            ✦ {t("landingTrust")}
+          </motion.p>
         </div>
       </section>
 
@@ -146,7 +174,7 @@ export default function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section className="py-16 border-t border-border/30">
+      <section id="how-it-works" className="py-16 border-t border-border/30 scroll-mt-20">
         <div className="container max-w-5xl mx-auto px-4">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-12">
             {t("landingHowTitle")}<span className="text-primary">.</span>
@@ -251,11 +279,15 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-border/30">
-        <div className="container text-center">
-          <p className="text-muted-foreground text-sm">
-            {t("landingFooter")}
+      </main>
+      <footer className="py-10 border-t border-border/30">
+        <div className="container flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <p className="font-heading">
+            <span className="font-bold text-foreground">ASCEND<span className="text-primary">.</span></span>
+            <span className="mx-2 opacity-50">·</span>
+            © {new Date().getFullYear()}
           </p>
+          <p className="text-center sm:text-right">{t("landingFooter")}</p>
         </div>
       </footer>
     </div>
