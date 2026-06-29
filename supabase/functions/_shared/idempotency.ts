@@ -50,6 +50,31 @@ export function memoryStore(): IdempotencyStore {
 
 const inflight = new Map<string, Promise<{ status: number; body: unknown; replayed: boolean }>>();
 
+// ---- Observability counters (per process instance) ----
+export const metrics = {
+  requests: 0,        // total POST requests that carried an Idempotency-Key
+  store_hits: 0,      // served from persistent store
+  inflight_hits: 0,   // served by joining an in-flight execution
+  misses: 0,          // had to actually run the handler
+  handler_runs: 0,    // total handler invocations
+  errors: 0,          // handler/store errors
+  started_at: new Date().toISOString(),
+};
+
+function log(event: string, extra: Record<string, unknown> = {}) {
+  console.log(JSON.stringify({ src: "idempotency", event, ...extra }));
+}
+
+export function resetMetrics() {
+  metrics.requests = 0;
+  metrics.store_hits = 0;
+  metrics.inflight_hits = 0;
+  metrics.misses = 0;
+  metrics.handler_runs = 0;
+  metrics.errors = 0;
+  metrics.started_at = new Date().toISOString();
+}
+
 /** Wrap a handler so identical POSTs sharing `Idempotency-Key` execute once. */
 export async function withIdempotency(
   req: Request,
@@ -60,6 +85,7 @@ export async function withIdempotency(
   if (req.method !== "POST") return run();
   const key = req.headers.get("Idempotency-Key") || "";
   if (!key) return run();
+  metrics.requests++;
 
   const replay = (status: number, body: unknown, replayed: boolean) =>
     new Response(JSON.stringify(body), {
@@ -74,6 +100,8 @@ export async function withIdempotency(
   // Parallel duplicate? wait for the in-flight execution.
   const pending = inflight.get(key);
   if (pending) {
+    metrics.inflight_hits++;
+    log("inflight_hit", { key });
     const { status, body } = await pending;
     return replay(status, body, true);
   }
@@ -82,7 +110,14 @@ export async function withIdempotency(
   // in the same tick hit the inflight branch above instead of double-executing.
   const promise = (async () => {
     const cached = await store.get(key);
-    if (cached) return { status: cached.status, body: cached.response, replayed: true };
+    if (cached) {
+      metrics.store_hits++;
+      log("store_hit", { key });
+      return { status: cached.status, body: cached.response, replayed: true };
+    }
+    metrics.misses++;
+    metrics.handler_runs++;
+    log("miss", { key });
     const res = await run();
     const ct = res.headers.get("content-type") || "";
     let body: unknown = null;
@@ -96,6 +131,10 @@ export async function withIdempotency(
   try {
     const { status, body, replayed } = await promise;
     return replay(status, body, replayed);
+  } catch (e) {
+    metrics.errors++;
+    log("error", { key, message: (e as Error).message });
+    throw e;
   } finally {
     inflight.delete(key);
   }
