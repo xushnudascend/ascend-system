@@ -3,6 +3,7 @@ import { ArrowRight, Flame, Target, Brain, Zap, Shield, Sparkles, ListChecks, Tr
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n, LANG_NAMES, type Lang } from "@/hooks/useI18n";
+import SEO from "@/components/SEO";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -33,6 +34,11 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
+      <SEO
+        title="Ascend — AI mentorship, habits & discipline tracking"
+        description="Build discipline with AI mentorship, habit tracking, courses, and analytics. Ascend helps you turn intentions into daily action."
+        path="/"
+      />
       {/* Nav */}
       <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container flex items-center justify-between h-16 gap-3">

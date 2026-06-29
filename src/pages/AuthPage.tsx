@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { lovable } from "@/integrations/lovable";
+import SEO from "@/components/SEO";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -60,6 +61,11 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <SEO
+        title="Sign in — Ascend"
+        description="Sign in or create your Ascend account to start building discipline with AI mentorship."
+        path="/auth"
+      />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
