@@ -55,7 +55,10 @@ function Banner() {
           lastErr = e;
           if (!isNetErr(e)) throw e;
         }
-        await sleep(delays[i]);
+        // full jitter: random value in [base/2, base*1.5)
+        const base = delays[i];
+        const jittered = base / 2 + Math.random() * base;
+        await sleep(jittered);
       }
       throw lastErr;
     };
