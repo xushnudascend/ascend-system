@@ -47,10 +47,12 @@ import IdentityQuizPage from "./pages/IdentityQuizPage";
 import LifeScorePage from "./pages/LifeScorePage";
 import WarRoomPage from "./pages/WarRoomPage";
 import WinsWallPage from "./pages/WinsWallPage";
+import ErrorBanner from "./components/ErrorBanner";
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <ErrorBanner>
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <I18nProvider>
@@ -109,6 +111,7 @@ const App = () => (
       </I18nProvider>
     </ThemeProvider>
   </QueryClientProvider>
+  </ErrorBanner>
 );
 
 export default App;
