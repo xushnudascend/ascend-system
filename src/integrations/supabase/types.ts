@@ -594,6 +594,27 @@ export type Database = {
         }
         Relationships: []
       }
+      idempotency_keys: {
+        Row: {
+          created_at: string
+          key: string
+          response: Json | null
+          status: number
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          response?: Json | null
+          status?: number
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          response?: Json | null
+          status?: number
+        }
+        Relationships: []
+      }
       life_scores: {
         Row: {
           body: number
