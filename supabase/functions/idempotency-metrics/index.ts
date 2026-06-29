@@ -4,6 +4,44 @@ import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.95.0";
 import { metrics } from "../_shared/idempotency.ts";
 
+export type MetricsBody = {
+  instance: {
+    requests: number;
+    store_hits: number;
+    inflight_hits: number;
+    misses: number;
+    handler_runs: number;
+    errors: number;
+    started_at: string;
+    hit_rate: number;
+  };
+  store: { total_keys: number; keys_last_24h: number };
+  now: string;
+};
+
+/** Pure builder so it can be unit-tested without hitting Supabase. */
+export function buildMetricsBody(
+  m: typeof metrics,
+  store: { total_keys: number; keys_last_24h: number },
+  now: Date = new Date(),
+): MetricsBody {
+  const total = m.requests || 1;
+  return {
+    instance: {
+      requests: m.requests,
+      store_hits: m.store_hits,
+      inflight_hits: m.inflight_hits,
+      misses: m.misses,
+      handler_runs: m.handler_runs,
+      errors: m.errors,
+      started_at: m.started_at,
+      hit_rate: +(((m.store_hits + m.inflight_hits) / total) * 100).toFixed(2),
+    },
+    store: { total_keys: store.total_keys ?? 0, keys_last_24h: store.keys_last_24h ?? 0 },
+    now: now.toISOString(),
+  };
+}
+
 export type AuthDeps = {
   serviceKey: string;
   getClaims: (token: string) => Promise<{ sub: string } | null>;
@@ -64,12 +102,10 @@ Deno.serve(async (req) => {
     db.from("idempotency_keys").select("*", { count: "exact", head: true }).gte("created_at", dayAgo),
   ]);
 
-  const total = metrics.requests || 1;
-  const body = {
-    instance: { ...metrics, hit_rate: +(((metrics.store_hits + metrics.inflight_hits) / total) * 100).toFixed(2) },
-    store: { total_keys: totalKeys ?? 0, keys_last_24h: keys24h ?? 0 },
-    now: new Date().toISOString(),
-  };
+  const body = buildMetricsBody(metrics, {
+    total_keys: totalKeys ?? 0,
+    keys_last_24h: keys24h ?? 0,
+  });
 
   return new Response(JSON.stringify(body, null, 2), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
